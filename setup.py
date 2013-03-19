@@ -32,7 +32,9 @@ setup(name='gs.group.member.base',
     zip_safe=False,
     install_requires=[
         'setuptools',
-        # -*- Extra requirements: -*-
+        'Products.CustomUserFolder',
+        'Products.GSGroup',
+        'Products.GSGroupMember'
     ],
     entry_points="""
     # -*- Entry points: -*-
