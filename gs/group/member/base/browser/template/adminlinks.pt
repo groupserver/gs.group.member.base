@@ -1,7 +1,0 @@
-<ul id="gs-group-member-base-admin-content">
-  <tal:block repeat="viewlet options/viewlets">
-    <tal:block content="structure viewlet/render">
-      Some links
-    </tal:block>
-  </tal:block>
-</ul><!--gs-group-member-base-admin-content-->

@@ -4,38 +4,4 @@
   xmlns:five="http://namespaces.zope.org/five"
   i18n_domain="groupserver">
 
-  <browser:viewlet
-    name="gs-group-member-base-logged-in-member-info"
-    manager="gs.group.home.interfaces.IGroupHomepageSecondary" 
-    class=".memberinfo.LoggedInMemberInfo"
-    template="browser/template/loggedinmemberinfo.pt"
-    permission="zope2.View" 
-    title="Membership Information"
-    weight="10" />
-  <browser:viewlet
-    name="gs-group-member-base-public-group-info"
-    manager="gs.group.home.interfaces.IGroupHomepageSecondary" 
-    class=".memberinfo.PublicGroupMemberInfo"
-    template="browser/template/publicgroupinfo.pt"
-    permission="zope2.View" 
-    title="Membership Information"
-    weight="10" />
-
-  <!--administration-->
-  <browser:viewlet
-    name="gs-group-member-base-admin"
-    manager="gs.group.home.interfaces.IGroupHomepageAdmin"
-    class=".viewlet.GroupAdminViewlet"
-    template="browser/template/admin.pt"
-    permission="zope2.ManageUsers"
-    title="Membership Administration"
-    weight="10" />
-  <browser:viewletManager
-    name="groupserver.GroupMemberAdminLinks"
-    for="gs.group.base.interfaces.IGSGroupMarker"
-    provides=".interfaces.IGroupMemberAdminLinks"
-    class="gs.viewlet.manager.WeightOrderedViewletManager"
-    template="browser/template/adminlinks.pt"
-    permission="zope2.View" />
-
 </configure>

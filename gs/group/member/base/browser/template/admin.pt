@@ -1,8 +1,0 @@
-<div id="gs-group-member-base-admin" 
-     role="navigation"
-     aria-labelledby="gs-group-member-base-admin-h">
-  <h4 id="gs-group-member-base-admin-h">Group Members</h4>
-  <p tal:replace="structure provider:groupserver.GroupMemberAdminLinks">
-    The links
-  </p>
-</div><!--gs-group-member-base-admin-->

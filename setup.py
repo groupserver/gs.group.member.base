@@ -38,4 +38,3 @@ setup(name='gs.group.member.base',
     # -*- Entry points: -*-
     """,
 )
-
