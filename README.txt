@@ -7,7 +7,7 @@ The base group member code
 
 :Author: `Michael JasonSmith`_
 :Contact: Michael JasonSmith <mpj17@onlinegroups.net>
-:Date: 2013-03-19
+:Date: 2013-10-02
 :Organization: `GroupServer.org`_
 :Copyright: This document is licensed under a
   `Creative Commons Attribution-Share Alike 3.0 New Zealand License`_
@@ -22,7 +22,7 @@ membership code in GroupServer.
 Utilities
 =========
 
-There are seven functions defined by this product.
+There are eight functions defined by this product.
 
 ``member_id``
 -------------
@@ -116,6 +116,19 @@ There are seven functions defined by this product.
 :Returns: ``True`` if the user is the participation coach. ``False``
           otherwise.
 :Example: ``user_participation_coach_of_group(self.loggedInUser, self.groupInfo)``
+
+``get_group_userids``
+---------------------
+
+:Synopsis: ``get_group_userids(context, group)``
+:Description: Gets the identifiers of all the group members.
+:Arguments: ``context``:
+              The context, used to acquire ``acl_users``.
+            ``group``:
+              Either the group identifier, a group-info, or a **site** info.
+:Returns: A list of identifiers.
+:Example: ``get_group_userids(self.context, self.groupInfo)``
+
 
 Resources
 =========

@@ -12,8 +12,9 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from Products.GSGroup.interfaces import IGSGroupInfo
 from Products.CustomUserFolder.interfaces import IGSUserInfo
+from Products.GSContent.interfaces import IGSSiteInfo
+from Products.GSGroup.interfaces import IGSGroupInfo
 from Products.GSGroupMember.groupmembership import userInfo_to_user,\
     groupInfo_to_group
 import logging
@@ -96,11 +97,42 @@ def member_id(groupId):
 
 
 def user_participation_coach_of_group(userInfo, groupInfo):
-    assert IGSUserInfo.providedBy(userInfo), '%s is not a IGSUserInfo' % \
-      userInfo
-    assert IGSGroupInfo.providedBy(groupInfo)
+    if not IGSUserInfo.providedBy(userInfo):
+        m = '{0} is not a IGSUserInfo'.format(userInfo)
+        raise TypeError(m)
+    if not IGSGroupInfo.providedBy(groupInfo):
+        m = '{0} is not a IGSGroupInfo'.format(groupInfo)
+        raise TypeError(m)
+
     ptnCoachId = groupInfo.get_property('ptn_coach_id', '')
     retval = user_member_of_group(userInfo, groupInfo)\
       and (userInfo.id == ptnCoachId)
     assert type(retval) == bool
+    return retval
+
+
+def get_group_userids(context, group):
+    'Get the user Ids of members of a user group.'
+    if not context:
+        raise ValueError('No context given')
+    if not group:
+        raise ValueError('No group given')
+
+    if type(group) == str:
+        groupId = group
+    elif IGSGroupInfo.providedBy(group) or IGSSiteInfo.providedBy(group):
+        groupId = group.id
+    else:
+        m = 'group is a "{0}", not a string, group or site info.'
+        msg = m.format(type(group))
+        raise TypeError(msg)
+
+    site_root = context.site_root()
+    assert site_root, 'No site_root'
+    assert hasattr(site_root, 'acl_users'), 'No acl_users at site_root'
+    memberGroupId = member_id(groupId)
+    memberGroup = site_root.acl_users.getGroupById(memberGroupId, [])
+    retval = list(memberGroup.getUsers())
+
+    assert type(retval) == list, 'retval is a {0}, not a list.'.format(retval)
     return retval
