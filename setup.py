@@ -42,10 +42,11 @@ setup(name='gs.group.member.base',
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages=['gs', 'gs.group', 'gs.group.member'],
     include_package_data=True,
-    zip_safe=False,
+    zip_safe=True,
     install_requires=[
         'setuptools',
         'Products.CustomUserFolder',
+        'Products.GSContent',
         'Products.GSGroup',
         'Products.GSGroupMember'
     ],
