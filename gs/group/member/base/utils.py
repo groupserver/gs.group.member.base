@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-##############################################################################
+############################################################################
 #
-# Copyright © 2013 OnlineGroups.net and Contributors.
+# Copyright © 2013, 2014 OnlineGroups.net and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -11,7 +11,8 @@
 # WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
 # FOR A PARTICULAR PURPOSE.
 #
-##############################################################################
+############################################################################
+from __future__ import absolute_import, unicode_literals
 from Products.CustomUserFolder.interfaces import IGSUserInfo
 from Products.GSContent.interfaces import IGSSiteInfo
 from Products.GSGroup.interfaces import IGSGroupInfo
@@ -24,12 +25,10 @@ log = logging.getLogger('gs.group.member.base.utils')
 def user_member_of_group(u, g):
     '''Is the user the member of the group?
 
-    ARGUMENTS
-        "user":  A GroupServer user.
-        "group": A GroupServer group.
-
-    RETURNS
-        True if the user is the member of the group. False otherwise.
+:param u:  A GroupServer user.
+:param g: A GroupServer group.
+:retval: ``True`` if the user is the member of the group. ``False``
+         otherwise.
     '''
     group = groupInfo_to_group(g)
     user = userInfo_to_user(u)
@@ -40,12 +39,12 @@ def user_member_of_group(u, g):
     memberGroup = member_id(group.getId())
     userGroups = user.getGroups()
     if retval and (memberGroup not in userGroups):
-        m = u'(%s) has the GroupMember role for (%s) but is not in  %s' %\
-          (user.getId(), group.getId(), memberGroup)
+        m = '(%s) has the GroupMember role for (%s) but is not in  %s' %\
+            (user.getId(), group.getId(), memberGroup)
         log.error(m)
     elif not(retval) and (memberGroup in userGroups):
-        m = u'(%s) is in %s, but does not have the GroupMember role in (%s)' %\
-          (user.getId(), memberGroup, group.getId())
+        m = '(%s) is in %s, but does not have the GroupMember role in '\
+            '(%s)' % (user.getId(), memberGroup, group.getId())
         log.error(m)
 
     assert type(retval) == bool
@@ -105,8 +104,8 @@ def user_participation_coach_of_group(userInfo, groupInfo):
         raise TypeError(m)
 
     ptnCoachId = groupInfo.get_property('ptn_coach_id', '')
-    retval = user_member_of_group(userInfo, groupInfo)\
-      and (userInfo.id == ptnCoachId)
+    retval = (user_member_of_group(userInfo, groupInfo)
+              and (userInfo.id == ptnCoachId))
     assert type(retval) == bool
     return retval
 
@@ -134,5 +133,6 @@ def get_group_userids(context, group):
     memberGroup = site_root.acl_users.getGroupById(memberGroupId, [])
     retval = list(memberGroup.getUsers())
 
-    assert type(retval) == list, 'retval is a {0}, not a list.'.format(retval)
+    assert type(retval) == list, \
+        'retval is a {0}, not a list.'.format(retval)
     return retval

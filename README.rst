@@ -7,17 +7,20 @@ The base group member code
 
 :Author: `Michael JasonSmith`_
 :Contact: Michael JasonSmith <mpj17@onlinegroups.net>
-:Date: 2013-10-02
+:Date: 2015-01-30
 :Organization: `GroupServer.org`_
 :Copyright: This document is licensed under a
-  `Creative Commons Attribution-Share Alike 3.0 New Zealand License`_
-  by `OnlineGroups.Net`_.
+`Creative Commons Attribution-Share Alike 4.0 International License`_
+  by `OnlineGroups.net`_.
+
+..  _Creative Commons Attribution-Share Alike 4.0 International License:
+    http://creativecommons.org/licenses/by-sa/4.0/
 
 Introduction
 ============
 
-This module contains a few utilities_ that are used by the rest of the
-membership code in GroupServer.
+This module contains a few utilities_ that are used by the rest
+of the membership code in GroupServer.
 
 Utilities
 =========
@@ -133,7 +136,7 @@ There are eight functions defined by this product.
 Resources
 =========
 
-- Code repository: https://source.iopen.net/groupserver/gs.group.member.base
+- Code repository: https://github.com/groupserver/gs.group.member.base
 - Questions and comments to http://groupserver.org/groups/development
 - Report bugs at https://redmine.iopen.net/projects/groupserver
 
@@ -141,5 +144,3 @@ Resources
 .. _GroupServer.org: http://groupserver.org/
 .. _OnlineGroups.Net: https://onlinegroups.net
 .. _Michael JasonSmith: http://groupserver.org/p/mpj17
-.. _Creative Commons Attribution-Share Alike 3.0 New Zealand License:
-   http://creativecommons.org/licenses/by-sa/3.0/nz/
