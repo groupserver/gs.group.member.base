@@ -46,7 +46,7 @@ setup(
     keywords='user, group, member, group member, manage, remove, role',
     author='Alice Murphy',
     author_email='alice@onlinegroups.net',
-    maintainter='Michael JasonSmith',
+    maintainer='Michael JasonSmith',
     maintainer_email='mpj17@onlinegroups.net',
     url='https://github.com/groupserver/gs.group.member.base',
     license='ZPL 2.1',

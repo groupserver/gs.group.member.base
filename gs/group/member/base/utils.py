@@ -73,7 +73,7 @@ def user_group_admin_of_group(u, g):
     group = groupInfo_to_group(g)
     user = userInfo_to_user(u)
     retval = ('GroupAdmin' in user.getRolesInContext(group))
-    assert type(retval) == bool
+    #assert type(retval) == bool
     return retval
 
 
@@ -90,7 +90,7 @@ user_division_admin_of_group = user_site_admin_of_group
 def member_id(groupId):
     assert type(groupId) == str
     assert groupId != ''
-    retval = '%s_member' % groupId
+    retval = b'%s_member' % groupId
     assert type(retval) == str
     return retval
 
