@@ -12,14 +12,74 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ############################################################################
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, print_function
+from logging import getLogger
+import sys
+from gs.core import to_ascii
 from Products.CustomUserFolder.interfaces import IGSUserInfo
 from Products.GSContent.interfaces import IGSSiteInfo
 from Products.GSGroup.interfaces import IGSGroupInfo
-from Products.GSGroupMember.groupmembership import userInfo_to_user,\
-    groupInfo_to_group
-import logging
-log = logging.getLogger('gs.group.member.base.utils')
+
+log = getLogger('gs.group.member.base.utils')
+
+if (sys.version_info < (3, )):
+    aString = basestring
+else:
+    aString = str
+
+
+def member_id(groupId):
+    '''Get the group membership ID from the group id
+
+:param str groupId: The identifier for the group
+:returns: The identifier for the member-group in ``acl_users``
+:rtype: str'''
+    if not(isinstance(groupId, aString)):
+        raise TypeError('Expected string, got {0}'.format(type(groupId)))
+    if not groupId:
+        raise ValueError('The groupId must be set (is "{0}")'.format(groupId))
+
+    retval = to_ascii('{0}_member'.format(groupId))
+    return retval
+
+
+def groupInfo_to_group(g):
+    '''Ensure that we are dealing with a group-instance
+
+:param g: The group-info instance, or a group instance
+:returns: A group instance
+
+For many utilities it is useful to be able to take either a group-instance or a
+group-info instance. This function ensures is what allows the utilities to be
+flexible.'''
+    if not g:
+        raise ValueError('The group must be set (is "{0}")'.format(g))
+
+    if IGSGroupInfo.providedBy(g):
+        retval = g.groupObj
+    else:  # Just assume that it is a group
+        retval = g
+    return retval
+
+
+def userInfo_to_user(u):
+    '''Ensure that we are dealing with a user-instance
+
+:param g: The user-info instance, or a user instance
+:returns: A user instance
+
+For many utilities it is useful to be able to take either a user-instance or a
+user-info instance. This function ensures is what allows the utilities to be
+flexible.'''
+    # TODO: Move to gs.profile.base
+    if not u:
+        raise ValueError('The user must be set (is "{0}")'.format(u))
+
+    if IGSUserInfo.providedBy(u):
+        user = u.user
+    else:
+        user = u
+    return user
 
 
 def user_member_of_group(u, g):
@@ -27,9 +87,8 @@ def user_member_of_group(u, g):
 
 :param u:  A GroupServer user.
 :param g: A GroupServer group.
-:retval: ``True`` if the user is the member of the group. ``False``
-         otherwise.
-    '''
+:retval: ``True`` if the user is the member of the group; ``False`` otherwise.
+:rtype: bool'''
     group = groupInfo_to_group(g)
     user = userInfo_to_user(u)
 
@@ -38,19 +97,23 @@ def user_member_of_group(u, g):
     memberGroup = member_id(group.getId())
     userGroups = user.getGroups()
     if retval and (memberGroup not in userGroups):
-        m = '(%s) has the GroupMember role for (%s) but is not in  %s' %\
-            (user.getId(), group.getId(), memberGroup)
-        log.error(m)
+        m = '(%s) has the GroupMember role for (%s) but is not in  %s'
+        log.warn(m, user.getId(), group.getId(), memberGroup)
     elif not(retval) and (memberGroup in userGroups):
-        m = '(%s) is in %s, but does not have the GroupMember role in '\
-            '(%s)' % (user.getId(), memberGroup, group.getId())
-        log.error(m)
+        m = '(%s) is in %s, but does not have the GroupMember role in (%s)'
+        log.warn(m, user.getId(), memberGroup, group.getId())
 
     assert type(retval) == bool
     return retval
 
 
 def user_member_of_site(u, site):
+    '''Is the user the member of the site?
+
+:param u:  A GroupServer user.
+:param site: A GroupServer site instance.
+:retval: ``True`` if the user is the member of the site; ``False`` otherwise.
+:rtype: bool'''
     user = userInfo_to_user(u)
     if hasattr(site, 'siteObj'):
         site = site.siteObj
@@ -59,16 +122,13 @@ def user_member_of_site(u, site):
     return retval
 
 
-def user_admin_of_group(u, g):
-    group = groupInfo_to_group(g)
-    user = userInfo_to_user(u)
-    retval = (user_group_admin_of_group(user, group) or
-              user_division_admin_of_group(user, group))
-    assert type(retval) == bool
-    return retval
-
-
 def user_group_admin_of_group(u, g):
+    '''Is the user a group administrator for the group?
+
+:param u:  A GroupServer user.
+:param site: A GroupServer group.
+:retval: ``True`` if the user is a group administrator of the group; ``False`` otherwise.
+:rtype: bool'''
     group = groupInfo_to_group(g)
     user = userInfo_to_user(u)
     retval = ('GroupAdmin' in user.getRolesInContext(group))
@@ -77,24 +137,48 @@ def user_group_admin_of_group(u, g):
 
 
 def user_site_admin_of_group(u, g):
+    '''Is the user a site-administrator in the context of the group?
+
+:param u:  A GroupServer user.
+:param site: A GroupServer group.
+:retval: ``True`` if the user is a site administrator in the context of the group;
+         ``False`` otherwise.
+:rtype: bool'''
     group = groupInfo_to_group(g)
     user = userInfo_to_user(u)
     retval = ('DivisionAdmin' in user.getRolesInContext(group))
     assert type(retval) == bool
     return retval
 
+
+#: The term *division* is a synonym for *site* for historical reasons
 user_division_admin_of_group = user_site_admin_of_group
 
 
-def member_id(groupId):
-    assert type(groupId) == str
-    assert groupId != ''
-    retval = b'%s_member' % groupId
-    assert type(retval) == str
+def user_admin_of_group(u, g):
+    '''Is the user an administrator for the group?
+
+:param u:  A GroupServer user.
+:param g: A GroupServer group.
+:retval: ``True`` if the user is an administrator of the group; ``False`` otherwise.
+:rtype: bool
+
+Sometimes it is enough that the user is *either* a site administrator or a group administrator.
+This function tests for that.'''
+    group = groupInfo_to_group(g)
+    user = userInfo_to_user(u)
+    retval = (user_group_admin_of_group(user, group) or user_division_admin_of_group(user, group))
+    assert type(retval) == bool
     return retval
 
 
 def user_participation_coach_of_group(userInfo, groupInfo):
+    '''Is the user an participation coach for the group?
+
+:param userInfo:  A GroupServer user.
+:param groupInfo: A GroupServer group.
+:retval: ``True`` if the user is the participation coach for the group; ``False`` otherwise.
+:rtype: bool'''
     if not IGSUserInfo.providedBy(userInfo):
         m = '{0} is not a IGSUserInfo'.format(userInfo)
         raise TypeError(m)
@@ -110,13 +194,18 @@ def user_participation_coach_of_group(userInfo, groupInfo):
 
 
 def get_group_userids(context, group):
-    'Get the user Ids of members of a user group.'
-    if not context:
-        raise ValueError('No context given')
-    if not group:
-        raise ValueError('No group given')
+    '''Get the user-identifiers of members of a user group.
 
-    if type(group) == str:
+:param context: A folder within a GroupServer instance.
+:param (str, group, groupInfo) group: A GroupServer group.
+:retval: The list of members of a group.
+:rtype: list'''
+    if not context:
+        raise ValueError('No context given (is "{0}")'.format(context))
+    if not group:
+        raise ValueError('No group given(is "{0}")'.format(context))
+
+    if (isinstance(group, aString)):
         groupId = group
     elif IGSGroupInfo.providedBy(group) or IGSSiteInfo.providedBy(group):
         groupId = group.id
@@ -132,6 +221,5 @@ def get_group_userids(context, group):
     memberGroup = site_root.acl_users.getGroupById(memberGroupId, [])
     retval = list(memberGroup.getUsers())
 
-    assert type(retval) == list, \
-        'retval is a {0}, not a list.'.format(retval)
+    assert type(retval) == list, 'retval is a "{0}", not a list. ({1})'.format(type(retval), retval)
     return retval
