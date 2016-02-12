@@ -34,7 +34,6 @@ def user_member_of_group(u, g):
     user = userInfo_to_user(u)
 
     retval = 'GroupMember' in user.getRolesInContext(group)
-
     # Thundering great sanity check
     memberGroup = member_id(group.getId())
     userGroups = user.getGroups()
