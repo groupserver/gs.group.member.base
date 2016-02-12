@@ -430,7 +430,7 @@ class TestGetGroupUserIds(TestCase):
         r = get_group_userids(context, 'example')
 
         self.assertEqual(expected, r)
-        context.site_root().acl_users.getGroupById.assert_has_call('example_member')
+        context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
     @patch('gs.group.member.base.utils.IGSGroupInfo')
     @patch('gs.group.member.base.utils.IGSSiteInfo')
@@ -445,7 +445,7 @@ class TestGetGroupUserIds(TestCase):
         r = get_group_userids(context, b'example')
 
         self.assertEqual(expected, r)
-        context.site_root().acl_users.getGroupById.assert_has_call('example_member')
+        context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
     @patch('gs.group.member.base.utils.IGSGroupInfo')
     @patch('gs.group.member.base.utils.IGSSiteInfo')
@@ -465,7 +465,7 @@ class TestGetGroupUserIds(TestCase):
         r = get_group_userids(context, groupInfo)
 
         self.assertEqual(expected, r)
-        context.site_root().acl_users.getGroupById.assert_has_call('example_member')
+        context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
     @patch('gs.group.member.base.utils.IGSGroupInfo')
     @patch('gs.group.member.base.utils.IGSSiteInfo')
@@ -485,4 +485,4 @@ class TestGetGroupUserIds(TestCase):
         r = get_group_userids(context, siteInfo)
 
         self.assertEqual(expected, r)
-        context.site_root().acl_users.getGroupById.assert_has_call('example_member')
+        context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
