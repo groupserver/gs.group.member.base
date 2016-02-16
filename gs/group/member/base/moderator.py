@@ -36,15 +36,14 @@ class Moderators(MemberListABC):
         retval = []
         if self.mlistInfo.is_moderated:
             mi = self.mlistInfo.get_property('moderator_members')
-
             moderatorIds = set(mi if mi else [])
-            moderatorButNotMember = moderatorIds - set(self.memberIds)
-            for uId in moderatorButNotMember:
+            sm = set(self.memberIds)
+            for uId in moderatorIds.difference(sm):
                 m = 'The user ID %s is listed as a moderator in the group %s (%s) on the '\
                     'site %s (%s), but is  not a member of the group.' %\
                     (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
                      self.siteInfo.id)
                 msg = to_ascii(m)
                 log.warn(msg)
-            retval = moderatorIds - moderatorButNotMember
+            retval = sm.intersection(moderatorIds)
         return retval

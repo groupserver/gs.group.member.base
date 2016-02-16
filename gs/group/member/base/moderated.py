@@ -37,16 +37,15 @@ class ModeratedMembers(MemberListABC):
         if self.mlistInfo.is_moderated:
             m = self.mlistInfo.get_property('moderated_members')
             moderatedIds = set(m if m else [])
-            moderatedButNotMember = moderatedIds - set(self.memberIds)
-
-            for uId in moderatedButNotMember:
+            sm = set(self.memberIds)
+            for uId in moderatedIds.difference(sm):
                 m = 'The user ID %s is listed as a moderated member in the group %s (%s) on the '\
                     'site %s (%s), but is  not a member of the group.' %\
                     (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
                      self.siteInfo.id)
                 msg = to_ascii(m)
                 log.warn(msg)
-            retval = moderatedIds - moderatedButNotMember
+            retval = moderatedIds.intersection(sm)
         return retval
 
     # --=mpj17=-- The old code used to moderate *everyone* if there was no one explicitly moderated,
