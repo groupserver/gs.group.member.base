@@ -55,3 +55,16 @@ class GroupAdminMembers(MemberListABC):
             log.warn(msg)
         retval = sm.intersection(adminIds)
         return retval
+
+
+class AdminMembers(MemberListABC):
+    @property
+    def adminIds(self):
+        return self.subsetIds
+
+    @Lazy
+    def subsetIds(self):
+        siteAdmins = SiteAdminMembers(self.group).siteAdminIds
+        groupAdmins = GroupAdminMembers(self.group).groupAdminIds
+        retval = siteAdmins + groupAdmins
+        return retval
