@@ -28,64 +28,35 @@ class TestModerators(TestCase):
         return retval
 
     @patch.object(Moderators, 'mlistInfo', new_callable=PropertyMock)
-    def test_len_not_moderated(self, m_mI):
-        m_mI.return_value = self.mailing_list(False, ['a', 'b', 'c', ])
+    def test_not_moderated(self, m_mlI):
+        m_mlI.return_value = self.mailing_list(False, ['b', 'c', ])
         m = Moderators(MagicMock())
-        r = len(m)
+        r = m.subsetIds
 
-        self.assertEqual(0, r)
+        self.assertEqual([], r)
 
     @patch.object(Moderators, 'memberIds', new_callable=PropertyMock)
     @patch.object(Moderators, 'mlistInfo', new_callable=PropertyMock)
-    def test_len_moderators(self, m_mlI, m_mI):
-        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
-        m = Moderators(MagicMock())
-        r = len(m)
-
-        m_mlI().get_property.assert_called_once_with('moderator_members')
-        self.assertEqual(3, r)
-
-    @patch.object(Moderators, 'memberIds', new_callable=PropertyMock)
-    @patch.object(Moderators, 'mlistInfo', new_callable=PropertyMock)
-    def test_contains(self, m_mlI, m_mI):
-        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
-        m = Moderators(MagicMock())
-
-        self.assertIn('a', m)
-
-    @patch.object(Moderators, 'memberIds', new_callable=PropertyMock)
-    @patch.object(Moderators, 'mlistInfo', new_callable=PropertyMock)
-    def test_does_not_contain(self, m_mlI, m_mI):
-        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
-        m = Moderators(MagicMock())
-
-        self.assertNotIn('f', m)
-
-    @patch('gs.group.member.base.listabc.createObject')
-    @patch.object(Moderators, 'memberIds', new_callable=PropertyMock)
-    @patch.object(Moderators, 'mlistInfo', new_callable=PropertyMock)
-    def test_iter(self, m_mlI, m_mI, m_cO):
-        '''Test that we itterate fine'''
-        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
-        m = Moderators(MagicMock())
-        r = [userInfo for userInfo in m]
-
-        self.assertEqual(len(m), len(r))
-        self.assertEqual(3, m_cO.call_count)
-
-    @patch('gs.group.member.base.listabc.createObject')
-    @patch.object(Moderators, 'memberIds', new_callable=PropertyMock)
-    @patch.object(Moderators, 'mlistInfo', new_callable=PropertyMock)
-    def test_non_member(self, m_mlI, m_mI, m_cO):
+    def test_normal(self, m_mlI, m_mI):
         '''Test that a non-member is excluded from the list of moderated members'''
-        m_mlI.return_value = self.mailing_list(True, ['b', 'c', ])
+        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
+        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m = Moderators(MagicMock())
+        r = m.subsetIds
+
+        self.assertEqual(set(['a', 'b', 'c']), r)
+
+    @patch('gs.group.member.base.moderator.log')
+    @patch.object(Moderators, 'siteInfo', new_callable=PropertyMock)
+    @patch.object(Moderators, 'groupInfo', new_callable=PropertyMock)
+    @patch.object(Moderators, 'memberIds', new_callable=PropertyMock)
+    @patch.object(Moderators, 'mlistInfo', new_callable=PropertyMock)
+    def test_non_member(self, m_mlI, m_mI, m_gI, m_sI, m_l):
+        '''Test that a non-member is excluded from the list of moderated members'''
+        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
         m_mI.return_value = ['b', 'c', 'd', 'e', 'f', ]
         m = Moderators(MagicMock())
-        r = [userInfo for userInfo in m]
+        r = m.subsetIds
 
-        self.assertEqual(len(m), len(r))
-        self.assertEqual(2, m_cO.call_count)
+        self.assertEqual(set(['b', 'c']), r)
+        self.assertEqual(1, m_l.warn.call_count)

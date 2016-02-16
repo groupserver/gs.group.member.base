@@ -64,6 +64,16 @@ class MemberListABC(object):
         return retval
 
     @Lazy
+    def groupInfo(self):
+        retval = self.mlistInfo.groupInfo
+        return retval
+
+    @Lazy
+    def siteInfo(self):
+        retval = createObject('groupserver.SiteInfo', self.group)
+        return retval
+
+    @Lazy
     def memberIds(self):
         retval = get_group_userids(self.group, self.group)
         return retval
