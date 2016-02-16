@@ -27,55 +27,6 @@ class TestModeratedMembers(TestCase):
         retval.get_property.return_value = moderatedMembers
         return retval
 
-    @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
-    def test_len_not_moderated(self, m_mI):
-        m_mI.return_value = self.mailing_list(False, ['a', 'b', 'c', ])
-        mm = ModeratedMembers(MagicMock())
-        r = len(mm)
-
-        self.assertEqual(0, r)
-
-    @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
-    @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
-    def test_len_moderated(self, m_mlI, m_mI):
-        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
-        mm = ModeratedMembers(MagicMock())
-        r = len(mm)
-
-        self.assertEqual(3, r)
-
-    @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
-    @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
-    def test_contains(self, m_mlI, m_mI):
-        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
-        mm = ModeratedMembers(MagicMock())
-
-        self.assertIn('a', mm)
-
-    @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
-    @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
-    def test_does_not_contain(self, m_mlI, m_mI):
-        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
-        mm = ModeratedMembers(MagicMock())
-
-        self.assertNotIn('f', mm)
-
-    @patch('gs.group.member.base.listabc.createObject')
-    @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
-    @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
-    def test_iter(self, m_mlI, m_mI, m_cO):
-        '''Test that we itterate fine'''
-        m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
-        mm = ModeratedMembers(MagicMock())
-        r = [userInfo for userInfo in mm]
-
-        self.assertEqual(len(mm), len(r))
-        self.assertEqual(3, m_cO.call_count)
-
     @patch('gs.group.member.base.listabc.createObject')
     @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
     @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
