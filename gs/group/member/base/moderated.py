@@ -25,7 +25,7 @@ from .utils import (get_group_userids, userInfo_to_user, )
 log = getLogger('gs.group.member.info.moderated')
 
 
-class ModeratedMembers(object):
+class MemberList(object):
 
     def __init__(self, group):
         self.group = group
@@ -35,6 +35,22 @@ class ModeratedMembers(object):
         retval = createObject('groupserver.MailingListInfo', self.group)
         return retval
 
+    @staticmethod
+    def get_id(member):
+        if isinstance(member, basestring):
+            retval = member
+        else:
+            u = userInfo_to_user(member)
+            try:
+                retval = u.getId()
+            except AttributeError:
+                m = 'Expected a string, a user-info, or a user, got a "{0}"'
+                msg = m.format(member)
+                raise TypeError(msg)
+        return retval
+
+
+class ModeratedMembers(MemberList):
     def __len__(self):
         retval = len(self.moderatedMemberIds)
         return retval
@@ -45,16 +61,7 @@ class ModeratedMembers(object):
             yield retval
 
     def __contains__(self, member):
-        if isinstance(member, basestring):
-            memberId = member
-        else:
-            u = userInfo_to_user(member)
-            try:
-                memberId = u.getId()
-            except AttributeError:
-                m = 'Expected a string, a user-info, or a user, got a "{0}"'
-                msg = m.format(member)
-                raise TypeError(msg)
+        memberId = self.get_id(member)
         retval = memberId in self.moderatedMemberIds
         return retval
 
@@ -97,9 +104,3 @@ class ModeratedMembers(object):
                 #not(isPtnCoach) and not(isModerator) and
                 #not(isBlocked)):
                         #retval.append(u)
-
-
-class Moderators(object):
-
-    def __init__(self, group):
-        self.group = group
