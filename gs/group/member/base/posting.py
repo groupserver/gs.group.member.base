@@ -21,37 +21,29 @@ from gs.core import to_ascii
 from .listabc import MemberListABC
 
 #: The logger for this module
-log = getLogger('gs.group.member.base.admins')
+log = getLogger('gs.group.member.base.moderated')
 
 
-class SiteAdminMembers(MemberListABC):
-    'The list of group-members that are site admins'
+class PostingMembers(MemberListABC):
+    '''The list of group members that are posting members in an announcement group'''
+
     @property
-    def siteAdminIds(self):
+    def postingMemberIds(self):
         return self.subsetIds
 
     @Lazy
     def subsetIds(self):
-        adminIds = set([u.getId() for u in self.group.users_with_local_role('DivisionAdmin')])
-        retval = set(self.memberIds).intersection(adminIds)
-        return retval
-
-
-class GroupAdminMembers(MemberListABC):
-    'The list of group-members that are group admins'
-    @property
-    def groupAdminIds(self):
-        return self.subsetIds
-
-    @Lazy
-    def subsetIds(self):
-        adminIds = set([u.getId() for u in self.group.users_with_local_role('GroupAdmin')])
+        # TODO: move to gs.group.type.announcement
+        # TOOD: Check that the group is an announcement group
+        m = self.mlistInfo.get_property('posting_members')
+        postingIds = set(m if m else [])
         sm = set(self.memberIds)
-        for uId in adminIds.difference(sm):
-            m = 'The user ID %s is listed as an administrator of the group %s (%s) on the '\
+        for uId in postingIds.difference(sm):
+            m = 'The user ID %s is listed as a posting member in the group %s (%s) on the '\
                 'site %s (%s), but is  not a member of the group.' %\
-                (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name, self.siteInfo.id)
+                (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
+                 self.siteInfo.id)
             msg = to_ascii(m)
             log.warn(msg)
-        retval = sm.intersection(adminIds)
+        retval = postingIds.intersection(sm)
         return retval

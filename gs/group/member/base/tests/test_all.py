@@ -18,16 +18,17 @@ from gs.group.member.base.tests.admins import (TestSiteAdmins, TestGroupAdmins, 
 from gs.group.member.base.tests.listabc import TestListABC
 from gs.group.member.base.tests.moderated import TestModeratedMembers
 from gs.group.member.base.tests.moderator import TestModerators
+from gs.group.member.base.tests.posting import TestPostingMembers
 from gs.group.member.base.tests.utils import (
     TestMemberId, TestGroupInfoToGroup, TestUserInfoToUser, TestUserMemberOfGroup,
     TestUserMemberOfSite, TestUserGroupAdmin, TestUserSiteAdminOfGroup, TestUserAdminOfGroup,
-    TestUserParticipationCoachOfGroup, TestGetGroupUserIds)
+    TestUserParticipationCoachOfGroup, TestGetGroupUserIds, )
 
 testCases = (
     TestMemberId, TestGroupInfoToGroup, TestUserInfoToUser, TestUserMemberOfGroup,
     TestUserMemberOfSite, TestUserGroupAdmin, TestUserSiteAdminOfGroup, TestUserAdminOfGroup,
     TestUserParticipationCoachOfGroup, TestGetGroupUserIds, TestListABC, TestModeratedMembers,
-    TestModerators, TestSiteAdmins, TestGroupAdmins)
+    TestModerators, TestSiteAdmins, TestGroupAdmins, TestPostingMembers, )
 
 
 def load_tests(loader, tests, pattern):
