@@ -92,7 +92,7 @@ class TestAdmins(AdminTest):
     @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
     @patch.object(GroupAdminMembers, 'memberIds', new_callable=PropertyMock)
     def test_normal(self, m_GAM_mI, m_SAM_mI):
-        '''Test that the list of site admins is returned'''
+        '''Test that the list of admins is returned'''
         g = MagicMock()
         g.users_with_local_role.side_effect = ([self.user(u) for u in ['a', 'b', ]],
                                                [self.user(u) for u in ['c', 'd', ]], )
@@ -101,3 +101,16 @@ class TestAdmins(AdminTest):
         r = m.subsetIds
 
         self.assertEqual(set(['a', 'b', 'c', 'd', ]), r)
+
+    @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
+    @patch.object(GroupAdminMembers, 'memberIds', new_callable=PropertyMock)
+    def test_dupe(self, m_GAM_mI, m_SAM_mI):
+        '''Test that the list of admins is returned is someone is both a site and group admin'''
+        g = MagicMock()
+        g.users_with_local_role.side_effect = ([self.user(u) for u in ['a', 'b', ]],
+                                               [self.user(u) for u in ['b', 'c', ]], )
+        m_GAM_mI.return_value = m_SAM_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m = AdminMembers(g)
+        r = m.subsetIds
+
+        self.assertEqual(set(['a', 'b', 'c', ]), r)
