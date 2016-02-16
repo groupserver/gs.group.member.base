@@ -66,5 +66,5 @@ class AdminMembers(MemberListABC):
     def subsetIds(self):
         siteAdmins = SiteAdminMembers(self.group).siteAdminIds
         groupAdmins = GroupAdminMembers(self.group).groupAdminIds
-        retval = siteAdmins + groupAdmins
+        retval = siteAdmins.union(groupAdmins)
         return retval

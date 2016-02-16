@@ -15,17 +15,19 @@
 from __future__ import absolute_import, unicode_literals, print_function
 from mock import (MagicMock, patch, PropertyMock)
 from unittest import TestCase
-from gs.group.member.base.admins import (SiteAdminMembers, GroupAdminMembers)
+from gs.group.member.base.admins import (SiteAdminMembers, GroupAdminMembers, AdminMembers, )
 
 
-class TestSiteAdmins(TestCase):
-    'Test the ``SiteAdminMembers`` class'
-
+class AdminTest(TestCase):
     @staticmethod
     def user(uId):
         retval = MagicMock()
         retval.getId.return_value = uId
         return retval
+
+
+class TestSiteAdmins(AdminTest):
+    'Test the ``SiteAdminMembers`` class'
 
     @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
     def test_normal(self, m_mI):
@@ -50,7 +52,7 @@ class TestSiteAdmins(TestCase):
         self.assertEqual(set(['b', 'c']), r)
 
 
-class TestGroupAdmins(TestCase):
+class TestGroupAdmins(AdminTest):
     'Test the ``GroupAdminMembers`` class'
 
     @staticmethod
@@ -84,3 +86,18 @@ class TestGroupAdmins(TestCase):
 
         self.assertEqual(set(['b', 'c']), r)
         self.assertEqual(1, m_l.warn.call_count)
+
+
+class TestAdmins(AdminTest):
+    @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
+    @patch.object(GroupAdminMembers, 'memberIds', new_callable=PropertyMock)
+    def test_normal(self, m_GAM_mI, m_SAM_mI):
+        '''Test that the list of site admins is returned'''
+        g = MagicMock()
+        g.users_with_local_role.side_effect = ([self.user(u) for u in ['a', 'b', ]],
+                                               [self.user(u) for u in ['c', 'd', ]], )
+        m_GAM_mI.return_value = m_SAM_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m = AdminMembers(g)
+        r = m.subsetIds
+
+        self.assertEqual(set(['a', 'b', 'c', 'd', ]), r)
