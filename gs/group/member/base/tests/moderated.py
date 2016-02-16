@@ -80,7 +80,7 @@ class TestModeratedMembers(TestCase):
     @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
     @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
     def test_non_member(self, m_mlI, m_mI, m_cO):
-        '''Test what happens when a non-member is in the list of moderated members'''
+        '''Test that a non-member is excluded from the list of moderated members'''
         m_mlI.return_value = self.mailing_list(True, ['b', 'c', ])
         m_mI.return_value = ['b', 'c', 'd', 'e', 'f', ]
         mm = ModeratedMembers(MagicMock())
