@@ -19,38 +19,13 @@ from logging import getLogger
 from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from gs.core import to_ascii
-from .utils import (get_group_userids, userInfo_to_user, )
+from .listabc import MemberListABC
 
 #: The logger for this module
 log = getLogger('gs.group.member.info.moderated')
 
 
-class MemberList(object):
-
-    def __init__(self, group):
-        self.group = group
-
-    @Lazy
-    def mlistInfo(self):
-        retval = createObject('groupserver.MailingListInfo', self.group)
-        return retval
-
-    @staticmethod
-    def get_id(member):
-        if isinstance(member, basestring):
-            retval = member
-        else:
-            u = userInfo_to_user(member)
-            try:
-                retval = u.getId()
-            except AttributeError:
-                m = 'Expected a string, a user-info, or a user, got a "{0}"'
-                msg = m.format(member)
-                raise TypeError(msg)
-        return retval
-
-
-class ModeratedMembers(MemberList):
+class ModeratedMembers(MemberListABC):
     def __len__(self):
         retval = len(self.moderatedMemberIds)
         return retval
@@ -63,11 +38,6 @@ class ModeratedMembers(MemberList):
     def __contains__(self, member):
         memberId = self.get_id(member)
         retval = memberId in self.moderatedMemberIds
-        return retval
-
-    @Lazy
-    def memberIds(self):
-        retval = get_group_userids(self.group, self.group)
         return retval
 
     @Lazy
