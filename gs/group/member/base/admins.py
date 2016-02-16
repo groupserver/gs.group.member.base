@@ -17,10 +17,11 @@
 from __future__ import absolute_import, unicode_literals, print_function
 from logging import getLogger
 from zope.cachedescriptors.property import Lazy
+from gs.core import to_ascii
 from .listabc import MemberListABC
 
 #: The logger for this module
-log = getLogger('gs.group.member.base.siteadmins')
+log = getLogger('gs.group.member.base.admins')
 
 
 class SiteAdminMembers(MemberListABC):
@@ -29,4 +30,20 @@ class SiteAdminMembers(MemberListABC):
     def subsetIds(self):
         adminIds = set([u.getId() for u in self.group.users_with_local_role('DivisionAdmin')])
         retval = set(self.memberIds).intersection(adminIds)
+        return retval
+
+
+class GroupAdminMembers(MemberListABC):
+    'The list of group-members that are group admins'
+    @Lazy
+    def subsetIds(self):
+        adminIds = set([u.getId() for u in self.group.users_with_local_role('GroupAdmin')])
+        sm = set(self.memberIds)
+        for uId in adminIds.difference(sm):
+            m = 'The user ID %s is listed as an administrator of the group %s (%s) on the '\
+                'site %s (%s), but is  not a member of the group.' %\
+                (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name, self.siteInfo.id)
+            msg = to_ascii(m)
+            log.warn(msg)
+        retval = sm.intersection(adminIds)
         return retval

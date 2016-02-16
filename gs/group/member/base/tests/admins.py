@@ -15,7 +15,7 @@
 from __future__ import absolute_import, unicode_literals, print_function
 from mock import (MagicMock, patch, PropertyMock)
 from unittest import TestCase
-from gs.group.member.base.siteadmins import (SiteAdminMembers, )
+from gs.group.member.base.admins import (SiteAdminMembers, GroupAdminMembers)
 
 
 class TestSiteAdmins(TestCase):
@@ -48,3 +48,39 @@ class TestSiteAdmins(TestCase):
         r = m.subsetIds
 
         self.assertEqual(set(['b', 'c']), r)
+
+
+class TestGroupAdmins(TestCase):
+    'Test the ``GroupAdminMembers`` class'
+
+    @staticmethod
+    def user(uId):
+        retval = MagicMock()
+        retval.getId.return_value = uId
+        return retval
+
+    @patch.object(GroupAdminMembers, 'memberIds', new_callable=PropertyMock)
+    def test_normal(self, m_mI):
+        '''Test that the list of site admins is returned'''
+        g = MagicMock()
+        g.users_with_local_role.return_value = [self.user(u) for u in ['a', 'b', 'c', ]]
+        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m = GroupAdminMembers(g)
+        r = m.subsetIds
+
+        self.assertEqual(set(['a', 'b', 'c']), r)
+
+    @patch('gs.group.member.base.admins.log')
+    @patch.object(GroupAdminMembers, 'siteInfo', new_callable=PropertyMock)
+    @patch.object(GroupAdminMembers, 'groupInfo', new_callable=PropertyMock)
+    @patch.object(GroupAdminMembers, 'memberIds', new_callable=PropertyMock)
+    def test_non_member(self, m_mI, m_gI, m_sI, m_l):
+        '''Test that a non-member is excluded from the list of site admins in the group'''
+        g = MagicMock()
+        g.users_with_local_role.return_value = [self.user(u) for u in ['a', 'b', 'c', ]]
+        m_mI.return_value = ['b', 'c', 'd', 'e', 'f', ]
+        m = GroupAdminMembers(g)
+        r = m.subsetIds
+
+        self.assertEqual(set(['b', 'c']), r)
+        self.assertEqual(1, m_l.warn.call_count)
