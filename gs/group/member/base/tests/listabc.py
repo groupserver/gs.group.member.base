@@ -13,7 +13,7 @@
 #
 ############################################################################
 from __future__ import absolute_import, unicode_literals, print_function
-from mock import (MagicMock, )  # patch, PropertyMock)
+from mock import (MagicMock, patch, )  # PropertyMock)
 from unittest import TestCase
 from gs.group.member.base.listabc import (MemberListABC, )
 
@@ -21,7 +21,19 @@ from gs.group.member.base.listabc import (MemberListABC, )
 class TestListABC(TestCase):
     'Test the ``MemberListABC`` class'
     def test_get_id_str(self):
+        'Ensure we treat a string like an ID'
         m = MemberListABC(MagicMock())
         r = m.get_id('dinsdale')
+
+        self.assertEqual('dinsdale', r)
+
+    @patch('gs.group.member.base.listabc.userInfo_to_user')
+    def test_get_id_user(self, m_uI_t_u):
+        'Ensure we get the user-ID from a user object'
+        m = MemberListABC(MagicMock())
+        u = MagicMock()
+        u.getId.return_value = 'dinsdale'
+        m_uI_t_u.return_value = u
+        r = m.get_id(u)
 
         self.assertEqual('dinsdale', r)
