@@ -18,11 +18,12 @@ from gs.group.member.base.tests.utils import (
     TestMemberId, TestGroupInfoToGroup, TestUserInfoToUser, TestUserMemberOfGroup,
     TestUserMemberOfSite, TestUserGroupAdmin, TestUserSiteAdminOfGroup, TestUserAdminOfGroup,
     TestUserParticipationCoachOfGroup, TestGetGroupUserIds)
+from gs.group.member.base.tests.moderated import TestModeratedMembers
 
 testCases = (
     TestMemberId, TestGroupInfoToGroup, TestUserInfoToUser, TestUserMemberOfGroup,
     TestUserMemberOfSite, TestUserGroupAdmin, TestUserSiteAdminOfGroup, TestUserAdminOfGroup,
-    TestUserParticipationCoachOfGroup, TestGetGroupUserIds, )
+    TestUserParticipationCoachOfGroup, TestGetGroupUserIds, TestModeratedMembers, )
 
 
 def load_tests(loader, tests, pattern):
