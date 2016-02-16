@@ -17,7 +17,6 @@
 from __future__ import absolute_import, unicode_literals, print_function
 from logging import getLogger
 from zope.cachedescriptors.property import Lazy
-from zope.component import createObject
 from gs.core import to_ascii
 from .listabc import MemberListABC
 
@@ -26,22 +25,14 @@ log = getLogger('gs.group.member.base.moderated')
 
 
 class ModeratedMembers(MemberListABC):
-    def __len__(self):
-        retval = len(self.moderatedMemberIds)
-        return retval
+    '''The list of group members that are moderated'''
 
-    def __iter__(self):
-        for uId in self.moderatedMemberIds:
-            retval = createObject('groupserver.UserFromId', self.group, uId)
-            yield retval
-
-    def __contains__(self, member):
-        memberId = self.get_id(member)
-        retval = memberId in self.moderatedMemberIds
-        return retval
+    @property
+    def moderatedMemberIds(self):
+        return self.subsetIds
 
     @Lazy
-    def moderatedMemberIds(self):
+    def subsetIds(self):
         retval = []
         if self.mlistInfo.is_moderated:
             m = self.mlistInfo.get_property('moderated_members')

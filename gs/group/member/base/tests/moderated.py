@@ -63,7 +63,7 @@ class TestModeratedMembers(TestCase):
 
         self.assertNotIn('f', mm)
 
-    @patch('gs.group.member.base.moderated.createObject')
+    @patch('gs.group.member.base.listabc.createObject')
     @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
     @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
     def test_iter(self, m_mlI, m_mI, m_cO):
@@ -76,7 +76,7 @@ class TestModeratedMembers(TestCase):
         self.assertEqual(len(mm), len(r))
         self.assertEqual(3, m_cO.call_count)
 
-    @patch('gs.group.member.base.moderated.createObject')
+    @patch('gs.group.member.base.listabc.createObject')
     @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
     @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
     def test_non_member(self, m_mlI, m_mI, m_cO):

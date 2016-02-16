@@ -18,11 +18,18 @@ from unittest import TestCase
 from gs.group.member.base.listabc import (MemberListABC, )
 
 
+class TestableList(MemberListABC):
+    @property
+    def subsetIds(self):
+        retval = []
+        return retval
+
+
 class TestListABC(TestCase):
     'Test the ``MemberListABC`` class'
     def test_get_id_str(self):
         'Ensure we treat a string like an ID'
-        m = MemberListABC(MagicMock())
+        m = TestableList(MagicMock())
         r = m.get_id('dinsdale')
 
         self.assertEqual('dinsdale', r)
@@ -30,7 +37,7 @@ class TestListABC(TestCase):
     @patch('gs.group.member.base.listabc.userInfo_to_user')
     def test_get_id_user(self, m_uI_t_u):
         'Ensure we get the user-ID from a user object'
-        m = MemberListABC(MagicMock())
+        m = TestableList(MagicMock())
         u = MagicMock()
         u.getId.return_value = 'dinsdale'
         m_uI_t_u.return_value = u

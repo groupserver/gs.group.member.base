@@ -14,25 +14,30 @@
 #
 ############################################################################
 from __future__ import absolute_import, unicode_literals, print_function
+from abc import ABCMeta, abstractproperty
 from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from .utils import (get_group_userids, userInfo_to_user, )
 
 
 class MemberListABC(object):
+    __metaclass__ = ABCMeta
 
     def __init__(self, group):
         self.group = group
 
-    @Lazy
-    def mlistInfo(self):
-        retval = createObject('groupserver.MailingListInfo', self.group)
+    @abstractproperty
+    def subsetIds(self):
+        '''The list of the user-ids for the subset of the members'''
+
+    def __len__(self):
+        retval = len(self.subsetIds)
         return retval
 
-    @Lazy
-    def memberIds(self):
-        retval = get_group_userids(self.group, self.group)
-        return retval
+    def __iter__(self):
+        for uId in self.subsetIds:
+            retval = createObject('groupserver.UserFromId', self.group, uId)
+            yield retval
 
     @staticmethod
     def get_id(member):
@@ -46,4 +51,19 @@ class MemberListABC(object):
                 m = 'Expected a string, a user-info, or a user, got a "{0}"'
                 msg = m.format(member)
                 raise TypeError(msg)
+        return retval
+
+    def __contains__(self, member):
+        memberId = self.get_id(member)
+        retval = memberId in self.subsetIds
+        return retval
+
+    @Lazy
+    def mlistInfo(self):
+        retval = createObject('groupserver.MailingListInfo', self.group)
+        return retval
+
+    @Lazy
+    def memberIds(self):
+        retval = get_group_userids(self.group, self.group)
         return retval
