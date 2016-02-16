@@ -21,7 +21,7 @@ from gs.core import to_ascii
 from .listabc import MemberListABC
 
 #: The logger for this module
-log = getLogger('gs.group.member.base.moderated')
+log = getLogger('gs.group.member.base.posting')
 
 
 class PostingMembers(MemberListABC):
