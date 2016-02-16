@@ -19,10 +19,14 @@ from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from zope.interface import implements
 from Products.XWFCore.XWFUtils import sort_by_name
-from gs.core import to_ascii
 from gs.profile.email.base.emailuser import EmailUser
 from Products.GSGroupMember.groupmembership import GroupMembers, InvitedGroupMembers
 from Products.GSGroupMember.interfaces import IGSGroupMembersInfo
+from .admins import (SiteAdminMembers, GroupAdminMembers, AdminMembers, )
+from .blocked import BlockedMembers
+from .moderated import ModeratedMembers
+from .moderator import Moderators
+from .posting import PostingMembers
 
 import logging
 log = logging.getLogger('GSGroupMembersInfo')
@@ -107,89 +111,37 @@ class GSGroupMembersInfo(object):
 
     @Lazy
     def groupAdmins(self):
-        admins = self.group.users_with_local_role('GroupAdmin')
-        retval = [createObject('groupserver.UserFromId', self.context, aId)
-                  for aId in admins if aId in self.memberIds]
+        retval = GroupAdminMembers(self.groupInfo.group)
         return retval
 
     @Lazy
     def siteAdmins(self):
-        admins = self.siteInfo.site_admins
-        retval = [a for a in admins if a.id in self.memberIds]
+        retval = SiteAdminMembers(self.groupInfo.group)
+        return retval
+
+    @Lazy
+    def managers(self):
+        retval = AdminMembers(self.groupInfo.group)
         return retval
 
     @Lazy
     def moderators(self):
-        retval = []
-        if self.mlistInfo.is_moderated:
-            moderatorIds = self.mlistInfo.get_property('moderator_members') \
-                or []
-            for uId in moderatorIds:
-                if uId not in self.memberIds:
-                    m = 'The user ID %s is listed as a moderator for  the group %s (%s) on the '\
-                        'site %s (%s), but is not a member of the group.' %\
-                        (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
-                         self.siteInfo.id)
-                    msg = to_ascii(m)
-                    log.warn(msg)
-                else:
-                    retval.append(createObject('groupserver.UserFromId', self.context, uId))
+        retval = Moderators(self.groupInfo.group)
         return retval
 
     @Lazy
     def moderatees(self):
-        retval = []
-        if self.mlistInfo.is_moderated:
-            moderatedIds = self.mlistInfo.get_property('moderated_members') \
-                or []
-            if moderatedIds:
-                for uId in moderatedIds:
-                    if uId not in self.memberIds:
-                        m = 'The user ID %s is listed as a moderated member in the group %s (%s) '\
-                            'on the site %s (%s), but is  not a member of the group.' %\
-                            (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
-                             self.siteInfo.id)
-                        msg = to_ascii(m)
-                        log.warn(msg)
-                    else:
-                        retval.append(createObject('groupserver.UserFromId', self.context, uId))
-            elif not(self.mlistInfo.is_moderate_new):
-                for u in self.fullMembers:
-                    isPtnCoach = self.ptnCoach and (self.ptnCoach.id == u.id)\
-                        or False
-                    isGrpAdmin = u.id in [a.id for a in self.groupAdmins]
-                    isSiteAdmin = u.id in [a.id for a in self.siteAdmins]
-                    isModerator = u.id in [m.id for m in self.moderators]
-                    isBlocked = u.id in [m.id for m in self.blockedMembers]
-                    if (not(isSiteAdmin) and not(isGrpAdmin) and not(isPtnCoach) and
-                            not(isModerator) and not(isBlocked)):
-                        retval.append(u)
-        return retval
-
-    @Lazy
-    def blockedMembers(self):
-        blockedIds = self.mlistInfo.get_property('blocked_members') or []
-        retval = [createObject('groupserver.UserFromId', self.context, uid) for uid in blockedIds]
+        retval = ModeratedMembers(self.groupInfo.group)
         return retval
 
     @Lazy
     def postingMembers(self):
-        retval = self.fullMembers
-        postingIds = self.mlistInfo.get_property('posting_members') or []
-        if postingIds:
-            posters = []
-            for uId in postingIds:
-                if uId not in self.memberIds:
-                    m = 'The user ID %s is listed as a posting member in the group %s (%s) on '\
-                        'the site %s (%s), but  is not a member of the group.' %\
-                        (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
-                         self.siteInfo.id)
-                    msg = to_ascii(m)
-                    log.warn(msg)
-                else:
-                    posters.append(createObject('groupserver.UserFromId', self.context, uId))
-                posters.sort(sort_by_name)
-                retval = posters
+        retval = PostingMembers(self.groupInfo.group)
+        return retval
+
+    @Lazy
+    def blockedMembers(self):
+        retval = BlockedMembers(self.groupInfo.group)
         return retval
 
     @Lazy
@@ -197,16 +149,4 @@ class GSGroupMembersInfo(object):
         emailUsers = [EmailUser(self.context, m) for m in self.members]
         members = [e.userInfo for e in emailUsers if not(e.get_verified_addresses())]
         retval = members
-        return retval
-
-    @Lazy
-    def managers(self):
-        admins = self.groupAdmins + self.siteAdmins
-        groupAdminIds = set([a.id for a in self.groupAdmins])
-        siteAdminIds = set([a.id for a in self.siteAdmins])
-        distinctAdminIds = groupAdminIds.union(siteAdminIds)
-        retval = []
-        for uId in distinctAdminIds:
-            admin = [a for a in admins if a.id == uId][0]
-            retval.append(admin)
         return retval
