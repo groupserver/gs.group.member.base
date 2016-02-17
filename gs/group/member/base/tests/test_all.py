@@ -15,7 +15,8 @@
 from __future__ import absolute_import, unicode_literals
 from unittest import TestSuite, main as unittest_main
 from gs.group.member.base.tests.admins import (TestSiteAdmins, TestGroupAdmins, TestAdmins, )
-from gs.group.member.base.tests.blocked import (TestBlockedMembers, )
+from gs.group.member.base.tests.blocked import TestBlockedMembers
+from gs.group.member.base.tests.invited import TestInvitedMembers
 from gs.group.member.base.tests.listabc import TestListABC
 from gs.group.member.base.tests.moderated import TestModeratedMembers
 from gs.group.member.base.tests.moderator import TestModerators
@@ -31,7 +32,7 @@ testCases = (
     TestUserMemberOfSite, TestUserGroupAdmin, TestUserSiteAdminOfGroup, TestUserAdminOfGroup,
     TestUserParticipationCoachOfGroup, TestGetGroupUserIds, TestListABC, TestModeratedMembers,
     TestModerators, TestSiteAdmins, TestGroupAdmins, TestAdmins, TestPostingMembers,
-    TestBlockedMembers, TestVerifiedMembers, TestUnverifiedMembers, )
+    TestBlockedMembers, TestVerifiedMembers, TestUnverifiedMembers, TestInvitedMembers, )
 
 
 def load_tests(loader, tests, pattern):
