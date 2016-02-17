@@ -24,13 +24,14 @@ from gs.group.member.base.tests.utils import (
     TestMemberId, TestGroupInfoToGroup, TestUserInfoToUser, TestUserMemberOfGroup,
     TestUserMemberOfSite, TestUserGroupAdmin, TestUserSiteAdminOfGroup, TestUserAdminOfGroup,
     TestUserParticipationCoachOfGroup, TestGetGroupUserIds, )
+from gs.group.member.base.tests.verified import (TestVerifiedMembers, TestUnverifiedMembers, )
 
 testCases = (
     TestMemberId, TestGroupInfoToGroup, TestUserInfoToUser, TestUserMemberOfGroup,
     TestUserMemberOfSite, TestUserGroupAdmin, TestUserSiteAdminOfGroup, TestUserAdminOfGroup,
     TestUserParticipationCoachOfGroup, TestGetGroupUserIds, TestListABC, TestModeratedMembers,
     TestModerators, TestSiteAdmins, TestGroupAdmins, TestAdmins, TestPostingMembers,
-    TestBlockedMembers, )
+    TestBlockedMembers, TestVerifiedMembers, TestUnverifiedMembers, )
 
 
 def load_tests(loader, tests, pattern):
