@@ -15,39 +15,28 @@
 #
 ############################################################################
 from __future__ import absolute_import, unicode_literals, print_function
+from operator import attrgetter
 from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
-from zope.interface import implements
-from Products.XWFCore.XWFUtils import sort_by_name
-from Products.GSGroupMember.groupmembership import GroupMembers, InvitedGroupMembers
-from Products.GSGroupMember.interfaces import IGSGroupMembersInfo
 from .admins import (SiteAdminMembers, GroupAdminMembers, AdminMembers, )
 from .blocked import BlockedMembers
-from .members import AllMembers
+from .invited import (InvitedMembers, FullMembers, )
+from .members import (AllMembers, NormalMembers, )
 from .moderated import ModeratedMembers
 from .moderator import Moderators
 from .posting import PostingMembers
 from .verified import (VerifiedMembers, UnverifiedMembers, )
 
-import logging
-log = logging.getLogger('GSGroupMembersInfo')
-
 
 class GSGroupMembersInfo(object):
-    implements(IGSGroupMembersInfo)
 
     def __init__(self, group):
         self.context = self.group = group
         assert self.context
 
     @Lazy
-    def mlistInfo(self):
-        retval = createObject('groupserver.MailingListInfo', self.group)
-        return retval
-
-    @Lazy
     def groupInfo(self):
-        retval = self.mlistInfo.groupInfo
+        retval = createObject('groupserver.GroupInfo', self.group)
         return retval
 
     @Lazy
@@ -55,54 +44,46 @@ class GSGroupMembersInfo(object):
         retval = createObject('groupserver.SiteInfo', self.group)
         return retval
 
-    # TODO: Add a "normalMembers" property (full members - ptnCoach - admin)
-
     @Lazy
-    def groupMembers(self):
-        retval = GroupMembers(self.context)
+    def normalMembers(self):
+        retval = NormalMembers(self.groupInfo.group)
         return retval
-
-    @Lazy
-    def sortedMembers(self):
-        retval = self.fullMembers
-        retval.sort(sort_by_name)
-        return retval
-
-    @Lazy
-    def fullMembers(self):
-        members = self.groupMembers.members
-        return members
-
-    @property
-    def fullMemberCount(self):
-        retval = len(self.groupMembers)
-        return retval
-
-    @Lazy
-    def invitedMembers(self):
-        retval = InvitedGroupMembers(self.context, self.siteInfo).members
-        return retval
-
-    @property
-    def invitedMemberCount(self):
-        return len(self.invitedMembers)
 
     @Lazy
     def members(self):
+        retval = self.groupMembers
+        return retval
+
+    @Lazy
+    def groupMembers(self):
         retval = AllMembers(self.groupInfo.group)
         return retval
 
     @Lazy
-    def memberIds(self):
-        retval = [m.id for m in self.members]
+    def sortedMembers(self):
+        '''All the users in a group, sorted by name
+
+.. warning:: Can be slow and use memory because it has to pull all the user-objects'''
+        retval = list(self.groupMembers)
+        retval.sort(attrgetter('name'))
+        return retval
+
+    @Lazy
+    def fullMembers(self):
+        retval = FullMembers(self.groupInfo.group)
+        return retval
+
+    @Lazy
+    def invitedMembers(self):
+        retval = InvitedMembers(self.groupInfo.group)
         return retval
 
     @Lazy
     def ptnCoach(self):
-        ptnCoachId = self.groupInfo.get_property('ptn_coach_id', '')
         retval = None
-        if ptnCoachId and (ptnCoachId in self.memberIds):
-            retval = createObject('groupserver.UserFromId', self.context, ptnCoachId)
+        if self.normalMembers.ptnCoachId:
+            retval = createObject('groupserver.UserFromId', self.context,
+                                  self.normalMembers.ptnCoachId)
         return retval
 
     @Lazy
