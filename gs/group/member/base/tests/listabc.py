@@ -13,6 +13,7 @@
 #
 ############################################################################
 from __future__ import absolute_import, unicode_literals, print_function
+from functools import partial
 from mock import (MagicMock, patch, )  # PropertyMock)
 from unittest import TestCase
 from gs.group.member.base.listabc import (MemberListABC, )
@@ -66,11 +67,32 @@ class TestListABC(TestCase):
 
         self.assertNotIn('d', m)
 
+    @staticmethod
+    def createUser(factoryName, context, userId, anon=False):
+        retval = MagicMock()
+        retval.id = userId
+        retval.anonymous = anon
+        return retval
+
     @patch('gs.group.member.base.listabc.createObject')
     def test_iter(self, m_cO):
         '''Test that we itterate fine'''
+        m_cO.side_effect = self.createUser
         m = TestableList(MagicMock(), ['a', 'b', 'c', ])
-        r = [userInfo for userInfo in m]
+        r = list(m)
 
         self.assertEqual(len(m), len(r))
         self.assertEqual(3, m_cO.call_count)
+
+    @patch('gs.group.member.base.listabc.log')
+    @patch('gs.group.member.base.listabc.createObject')
+    def test_iter_false(self, m_cO, m_log):
+        '''Test that we handle non-users fine'''
+        m_cO.side_effect = partial(self.createUser, anon=True)
+        m = TestableList(MagicMock(), ['a', 'b', 'c', ])
+        r = list(m)
+
+        self.assertNotEqual(len(m), len(r))
+        self.assertEqual(0, len(r))
+        self.assertEqual(3, m_cO.call_count)
+        self.assertEqual(3, m_log.error.call_count)

@@ -15,9 +15,13 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals, print_function
 from abc import ABCMeta, abstractproperty
+from logging import getLogger
 from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from .utils import (get_group_userids, userInfo_to_user, )
+
+#: The logger for the member-list
+log = getLogger('gs.group.member.base.listabc')
 
 
 class MemberListABC(object):
@@ -37,6 +41,9 @@ class MemberListABC(object):
     def __iter__(self):
         for uId in self.subsetIds:
             retval = createObject('groupserver.UserFromId', self.group, uId)
+            if retval.anonymous:
+                log.error('Could not create a user-info for the user-identifier "%s"', uId)
+                continue
             yield retval
 
     @staticmethod
