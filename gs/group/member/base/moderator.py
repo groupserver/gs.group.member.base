@@ -17,7 +17,6 @@
 from __future__ import absolute_import, unicode_literals, print_function
 from logging import getLogger
 from zope.cachedescriptors.property import Lazy
-from gs.core import to_ascii
 from .listabc import MemberListABC
 
 #: The logger for this module
@@ -39,10 +38,8 @@ class Moderators(MemberListABC):
             moderatorIds = set(mi if mi else [])
             for uId in moderatorIds.difference(self.memberIds):
                 m = 'The user ID %s is listed as a moderator in the group %s (%s) on the '\
-                    'site %s (%s), but is  not a member of the group.' %\
-                    (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
-                     self.siteInfo.id)
-                msg = to_ascii(m)
-                log.warn(msg)
+                    'site %s (%s), but is  not a member of the group.'
+                log.warn(m, uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
+                         self.siteInfo.id)
             retval = self.memberIds.intersection(moderatorIds)
         return retval

@@ -15,14 +15,10 @@
 #
 ############################################################################
 from __future__ import absolute_import, unicode_literals, print_function
-from logging import getLogger
 from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from gs.profile.email.base.emailuser import EmailUser
 from .listabc import MemberListABC
-
-#: The logger for this module
-log = getLogger('gs.group.member.base.verified')
 
 
 class VerifiedMembers(MemberListABC):
