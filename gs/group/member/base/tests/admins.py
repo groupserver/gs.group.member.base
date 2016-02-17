@@ -34,7 +34,7 @@ class TestSiteAdmins(AdminTest):
         '''Test that the list of site admins is returned'''
         g = MagicMock()
         g.users_with_local_role.return_value = [self.user(u) for u in ['a', 'b', 'c', ]]
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = SiteAdminMembers(g)
         r = m.subsetIds
 
@@ -45,7 +45,7 @@ class TestSiteAdmins(AdminTest):
         '''Test that a non-member is excluded from the list of site admins in the group'''
         g = MagicMock()
         g.users_with_local_role.return_value = [self.user(u) for u in ['a', 'b', 'c', ]]
-        m_mI.return_value = ['b', 'c', 'd', 'e', 'f', ]
+        m_mI.return_value = set(['b', 'c', 'd', 'e', 'f', ])
         m = SiteAdminMembers(g)
         r = m.subsetIds
 
@@ -66,7 +66,7 @@ class TestGroupAdmins(AdminTest):
         '''Test that the list of site admins is returned'''
         g = MagicMock()
         g.users_with_local_role.return_value = [self.user(u) for u in ['a', 'b', 'c', ]]
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = GroupAdminMembers(g)
         r = m.subsetIds
 
@@ -80,7 +80,7 @@ class TestGroupAdmins(AdminTest):
         '''Test that a non-member is excluded from the list of site admins in the group'''
         g = MagicMock()
         g.users_with_local_role.return_value = [self.user(u) for u in ['a', 'b', 'c', ]]
-        m_mI.return_value = ['b', 'c', 'd', 'e', 'f', ]
+        m_mI.return_value = set(['b', 'c', 'd', 'e', 'f', ])
         m = GroupAdminMembers(g)
         r = m.subsetIds
 
@@ -96,7 +96,7 @@ class TestAdmins(AdminTest):
         g = MagicMock()
         g.users_with_local_role.side_effect = ([self.user(u) for u in ['a', 'b', ]],
                                                [self.user(u) for u in ['c', 'd', ]], )
-        m_GAM_mI.return_value = m_SAM_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m_GAM_mI.return_value = m_SAM_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = AdminMembers(g)
         r = m.subsetIds
 
@@ -109,7 +109,7 @@ class TestAdmins(AdminTest):
         g = MagicMock()
         g.users_with_local_role.side_effect = ([self.user(u) for u in ['a', 'b', ]],
                                                [self.user(u) for u in ['b', 'c', ]], )
-        m_GAM_mI.return_value = m_SAM_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m_GAM_mI.return_value = m_SAM_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = AdminMembers(g)
         r = m.subsetIds
 

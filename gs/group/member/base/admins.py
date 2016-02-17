@@ -33,7 +33,7 @@ class SiteAdminMembers(MemberListABC):
     @Lazy
     def subsetIds(self):
         adminIds = set([u.getId() for u in self.group.users_with_local_role('DivisionAdmin')])
-        retval = set(self.memberIds).intersection(adminIds)
+        retval = self.memberIds.intersection(adminIds)
         return retval
 
 
@@ -46,14 +46,13 @@ class GroupAdminMembers(MemberListABC):
     @Lazy
     def subsetIds(self):
         adminIds = set([u.getId() for u in self.group.users_with_local_role('GroupAdmin')])
-        sm = set(self.memberIds)
-        for uId in adminIds.difference(sm):
+        for uId in adminIds.difference(self.memberIds):
             m = 'The user ID %s is listed as an administrator of the group %s (%s) on the '\
                 'site %s (%s), but is  not a member of the group.' %\
                 (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name, self.siteInfo.id)
             msg = to_ascii(m)
             log.warn(msg)
-        retval = sm.intersection(adminIds)
+        retval = self.memberIds.intersection(adminIds)
         return retval
 
 

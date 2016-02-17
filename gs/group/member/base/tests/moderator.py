@@ -40,7 +40,7 @@ class TestModerators(TestCase):
     def test_normal(self, m_mlI, m_mI):
         '''Test that a non-member is excluded from the list of moderated members'''
         m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = Moderators(MagicMock())
         r = m.subsetIds
 
@@ -54,7 +54,7 @@ class TestModerators(TestCase):
     def test_non_member(self, m_mlI, m_mI, m_gI, m_sI, m_l):
         '''Test that a non-member is excluded from the list of moderated members'''
         m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['b', 'c', 'd', 'e', 'f', ]
+        m_mI.return_value = set(['b', 'c', 'd', 'e', 'f', ])
         m = Moderators(MagicMock())
         r = m.subsetIds
 

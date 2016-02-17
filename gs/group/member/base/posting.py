@@ -37,13 +37,12 @@ class PostingMembers(MemberListABC):
         # TOOD: Check that the group is an announcement group
         m = self.mlistInfo.get_property('posting_members')
         postingIds = set(m if m else [])
-        sm = set(self.memberIds)
-        for uId in postingIds.difference(sm):
+        for uId in postingIds.difference(self.memberIds):
             m = 'The user ID %s is listed as a posting member in the group %s (%s) on the '\
                 'site %s (%s), but is  not a member of the group.' %\
                 (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
                  self.siteInfo.id)
             msg = to_ascii(m)
             log.warn(msg)
-        retval = postingIds.intersection(sm)
+        retval = postingIds.intersection(self.memberIds)
         return retval

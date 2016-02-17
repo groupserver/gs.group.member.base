@@ -75,5 +75,5 @@ class MemberListABC(object):
 
     @Lazy
     def memberIds(self):
-        retval = get_group_userids(self.group, self.group)
+        retval = set(get_group_userids(self.group, self.group))
         return retval

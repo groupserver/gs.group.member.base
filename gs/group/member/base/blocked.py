@@ -35,13 +35,12 @@ class BlockedMembers(MemberListABC):
     def subsetIds(self):
         m = self.mlistInfo.get_property('blocked_members')
         blockedIds = set(m if m else [])
-        sm = set(self.memberIds)
-        for uId in blockedIds.difference(sm):
+        for uId in blockedIds.difference(self.memberIds):
             m = 'The user ID %s is listed as a blocked member in the group %s (%s) on the '\
                 'site %s (%s), but is  not a member of the group.' %\
                 (uId, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
                  self.siteInfo.id)
             msg = to_ascii(m)
             log.warn(msg)
-        retval = blockedIds.intersection(sm)
+        retval = blockedIds.intersection(self.memberIds)
         return retval

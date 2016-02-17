@@ -19,14 +19,15 @@ from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from zope.interface import implements
 from Products.XWFCore.XWFUtils import sort_by_name
-from gs.profile.email.base.emailuser import EmailUser
 from Products.GSGroupMember.groupmembership import GroupMembers, InvitedGroupMembers
 from Products.GSGroupMember.interfaces import IGSGroupMembersInfo
 from .admins import (SiteAdminMembers, GroupAdminMembers, AdminMembers, )
 from .blocked import BlockedMembers
+from .members import AllMembers
 from .moderated import ModeratedMembers
 from .moderator import Moderators
 from .posting import PostingMembers
+from .verified import (VerifiedMembers, UnverifiedMembers, )
 
 import logging
 log = logging.getLogger('GSGroupMembersInfo')
@@ -88,11 +89,7 @@ class GSGroupMembersInfo(object):
 
     @Lazy
     def members(self):
-        allMembers = self.fullMembers + self.invitedMembers
-        d = {}
-        for member in allMembers:
-            d[member.id] = member
-        retval = list(d.values())
+        retval = AllMembers(self.groupInfo.group)
         return retval
 
     @Lazy
@@ -105,8 +102,7 @@ class GSGroupMembersInfo(object):
         ptnCoachId = self.groupInfo.get_property('ptn_coach_id', '')
         retval = None
         if ptnCoachId and (ptnCoachId in self.memberIds):
-            retval = createObject('groupserver.UserFromId',
-                                  self.context, ptnCoachId)
+            retval = createObject('groupserver.UserFromId', self.context, ptnCoachId)
         return retval
 
     @Lazy
@@ -146,7 +142,10 @@ class GSGroupMembersInfo(object):
 
     @Lazy
     def unverifiedMembers(self):
-        emailUsers = [EmailUser(self.context, m) for m in self.members]
-        members = [e.userInfo for e in emailUsers if not(e.get_verified_addresses())]
-        retval = members
+        retval = UnverifiedMembers(self.groupInfo.group)
+        return retval
+
+    @Lazy
+    def verifiedMembers(self):
+        retval = VerifiedMembers(self.groupInfo.group)
         return retval

@@ -33,14 +33,14 @@ class TestModeratedMembers(TestCase):
         m = ModeratedMembers(MagicMock())
         r = m.subsetIds
 
-        self.assertEqual([], r)
+        self.assertEqual(set(), r)
 
     @patch.object(ModeratedMembers, 'memberIds', new_callable=PropertyMock)
     @patch.object(ModeratedMembers, 'mlistInfo', new_callable=PropertyMock)
     def test_normal(self, m_mlI, m_mI):
         '''Test that a non-member is excluded from the list of moderated members'''
         m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['a', 'b', 'c', 'd', 'e', 'f', ]
+        m_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = ModeratedMembers(MagicMock())
         r = m.subsetIds
 
@@ -54,7 +54,7 @@ class TestModeratedMembers(TestCase):
     def test_non_member(self, m_mlI, m_mI, m_gI, m_sI, m_l):
         '''Test that a non-member is excluded from the list of moderated members'''
         m_mlI.return_value = self.mailing_list(True, ['a', 'b', 'c', ])
-        m_mI.return_value = ['b', 'c', 'd', 'e', 'f', ]
+        m_mI.return_value = set(['b', 'c', 'd', 'e', 'f', ])
         m = ModeratedMembers(MagicMock())
         r = m.subsetIds
 
