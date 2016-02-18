@@ -42,7 +42,9 @@ class MemberListABC(object):
         for uId in self.subsetIds:
             retval = createObject('groupserver.UserFromId', self.group, uId)
             if retval.anonymous:
-                log.error('Could not create a user-info for the user-identifier "%s"', uId)
+                log.error('Could not create a user-info for the user-identifier "%s" in the '
+                          'group %s (%s) on %s (%s)', uId, self.groupInfo.name, self.groupInfo.id,
+                          self.siteInfo.name, self.siteInfo.id)
                 continue
             yield retval
 
