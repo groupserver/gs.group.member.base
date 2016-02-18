@@ -20,15 +20,15 @@ from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from .admins import (SiteAdminMembers, GroupAdminMembers, AdminMembers, )
 from .blocked import BlockedMembers
-from .invited import (InvitedMembers, FullMembers, )
-from .members import (AllMembers, NormalMembers, )
+from .invited import InvitedMembers
+from .members import (AllMembers, NormalMembers, FullMembers, )
 from .moderated import ModeratedMembers
 from .moderator import Moderators
 from .posting import PostingMembers
 from .verified import (VerifiedMembers, UnverifiedMembers, )
 
 
-class GSGroupMembersInfo(object):
+class GroupMembersInfo(object):
 
     def __init__(self, group):
         self.context = self.group = group
@@ -45,8 +45,13 @@ class GSGroupMembersInfo(object):
         return retval
 
     @Lazy
+    def mlistInfo(self):
+        retval = createObject('groupserver.MailingListInfo', self.group)
+        return retval
+
+    @Lazy
     def normalMembers(self):
-        retval = NormalMembers(self.groupInfo.group)
+        retval = NormalMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
@@ -56,7 +61,7 @@ class GSGroupMembersInfo(object):
 
     @Lazy
     def groupMembers(self):
-        retval = AllMembers(self.groupInfo.group)
+        retval = AllMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
@@ -65,17 +70,17 @@ class GSGroupMembersInfo(object):
 
 .. warning:: Can be slow and use memory because it has to pull all the user-objects'''
         retval = list(self.groupMembers)
-        retval.sort(attrgetter('name'))
+        retval.sort(key=attrgetter('name'))
         return retval
 
     @Lazy
     def fullMembers(self):
-        retval = FullMembers(self.groupInfo.group)
+        retval = FullMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def invitedMembers(self):
-        retval = InvitedMembers(self.groupInfo.group)
+        retval = InvitedMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
@@ -88,45 +93,45 @@ class GSGroupMembersInfo(object):
 
     @Lazy
     def groupAdmins(self):
-        retval = GroupAdminMembers(self.groupInfo.group)
+        retval = GroupAdminMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def siteAdmins(self):
-        retval = SiteAdminMembers(self.groupInfo.group)
+        retval = SiteAdminMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def managers(self):
-        retval = AdminMembers(self.groupInfo.group)
+        retval = AdminMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def moderators(self):
-        retval = Moderators(self.groupInfo.group)
+        retval = Moderators(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def moderatees(self):
-        retval = ModeratedMembers(self.groupInfo.group)
+        retval = ModeratedMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def postingMembers(self):
-        retval = PostingMembers(self.groupInfo.group)
+        retval = PostingMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def blockedMembers(self):
-        retval = BlockedMembers(self.groupInfo.group)
+        retval = BlockedMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def unverifiedMembers(self):
-        retval = UnverifiedMembers(self.groupInfo.group)
+        retval = UnverifiedMembers(self.groupInfo.groupObj)
         return retval
 
     @Lazy
     def verifiedMembers(self):
-        retval = VerifiedMembers(self.groupInfo.group)
+        retval = VerifiedMembers(self.groupInfo.groupObj)
         return retval
