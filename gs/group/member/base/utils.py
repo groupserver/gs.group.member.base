@@ -17,7 +17,6 @@ from logging import getLogger
 import sys
 from gs.core import to_ascii
 from Products.CustomUserFolder.interfaces import IGSUserInfo
-from Products.GSContent.interfaces import IGSSiteInfo
 from Products.GSGroup.interfaces import IGSGroupInfo
 
 log = getLogger('gs.group.member.base.utils')
@@ -74,10 +73,9 @@ flexible.'''
     # TODO: Move to gs.profile.base
     if not u:
         raise ValueError('The user must be set (is "{0}")'.format(u))
-
-    if IGSUserInfo.providedBy(u):
+    try:
         user = u.user
-    else:
+    except AttributeError:
         user = u
     return user
 
@@ -205,10 +203,12 @@ def get_group_userids(context, group):
     if not group:
         raise ValueError('No group given(is "{0}")'.format(context))
 
-    if (isinstance(group, aString)):
-        groupId = group
-    elif IGSGroupInfo.providedBy(group) or IGSSiteInfo.providedBy(group):
+    if hasattr(group, 'getId'):
+        groupId = group.getId()
+    elif hasattr(group, 'id'):
         groupId = group.id
+    elif (isinstance(group, aString)):
+        groupId = group
     else:
         m = 'group is a "{0}", not a string, group or site info.'
         msg = m.format(type(group))

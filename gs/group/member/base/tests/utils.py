@@ -87,33 +87,44 @@ class TestUserInfoToUser(TestCase):
     @patch('gs.group.member.base.utils.IGSUserInfo')
     def test_is_user(self, m_IGSUI):
         'Test we get the user from a user'
-        m_IGSUI.providedBy.return_value = False
         user = MagicMock()
         user.user = 'This is not a user'
         r = userInfo_to_user(user)
 
-        self.assertEqual(user, r)
+        self.assertEqual(user.user, r)
 
 
-class TestUserMemberOfGroup(TestCase):
+class UserTest(TestCase):
+    'And ABC for tests involving users'
+
+    @staticmethod
+    def user(roles, groups=[]):
+        retval = MagicMock()
+        retval.getRolesInContext.return_value = roles
+        retval.getGroups.return_value = groups
+        del(retval.user)  # So we throw an AttributeError on access
+        return retval
+
+    @staticmethod
+    def group(gId):
+        retval = MagicMock()
+        retval.getId.return_value = gId
+        return retval
+
+
+class TestUserMemberOfGroup(UserTest):
     'Test the ``user_member_of_group`` function'
 
     def test_is_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['GroupMember', ]
-        user.getGroups.return_value = ['example_member', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['GroupMember', ], ['example_member', ])
+        group = self.group('example')
         r = user_member_of_group(user, group)
 
         self.assertTrue(r)
 
     def test_non_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = []
-        user.getGroups.return_value = ['other_member', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user([], ['other_member', ])
+        group = self.group('example')
         r = user_member_of_group(user, group)
 
         self.assertFalse(r)
@@ -122,11 +133,8 @@ class TestUserMemberOfGroup(TestCase):
     def test_odd_userGroups(self, m_log):
         '''Test the odd case where a person has the ``GroupMember`` role, but the group is absent
 from the list of groups for the member.'''
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['GroupMember', ]
-        user.getGroups.return_value = ['other_member', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['GroupMember', ], ['other_member', ])
+        group = self.group('example')
         r = user_member_of_group(user, group)
 
         self.assertTrue(r)
@@ -136,33 +144,33 @@ from the list of groups for the member.'''
     def test_odd_not_userGroups(self, m_log):
         '''Test the odd case where a person lacks the ``GroupMember`` role, but the group is in
 the list of groups for the member.'''
-        user = MagicMock()
-        user.getRolesInContext.return_value = []
-        user.getGroups.return_value = ['example_member', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user([], ['example_member', ])
+        group = self.group('example')
         r = user_member_of_group(user, group)
 
         self.assertFalse(r)
         self.assertEqual(1, m_log.warn.call_count, 'Failed to raise a warning')
 
 
-class TestUserMemberOfSite(TestCase):
+class TestUserMemberOfSite(UserTest):
     'Test the ``user_member_of_site`` function'
 
+    @staticmethod
+    def site():
+        retval = MagicMock()
+        del(retval.siteObj)
+        return retval
+
     def test_is_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['DivisionMember', ]
-        site = MagicMock()
-        del(site.siteObj)
+        user = self.user(['DivisionMember', ])
+        site = self.site()
         r = user_member_of_site(user, site)
 
         self.assertTrue(r)
 
     def test_is_member_site_info(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['DivisionMember', ]
-        site = MagicMock()
+        user = self.user(['DivisionMember', ])
+        site = MagicMock()  # Needs site.siteObj
         site.getId.return_value = 'example'
         r = user_member_of_site(user, site)
 
@@ -170,157 +178,125 @@ class TestUserMemberOfSite(TestCase):
         user.getRolesInContext.assert_called_once_with(site.siteObj)
 
     def test_non_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = []
-        site = MagicMock()
-        del(site.siteObj)
+        user = self.user([])
+        site = self.site()
         r = user_member_of_site(user, site)
 
         self.assertFalse(r)
 
 
-class TestUserGroupAdmin(TestCase):
+class TestUserGroupAdmin(UserTest):
     'Test the ``user_group_admin_of_group`` function'
 
     def test_user_group_admin(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['GroupAdmin', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['GroupAdmin', ])
+        group = self.group('example')
         r = user_group_admin_of_group(user, group)
 
         self.assertTrue(r)
 
     def test_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['GroupMember', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['GroupMember', ])
+        group = self.group('example')
         r = user_group_admin_of_group(user, group)
 
         self.assertFalse(r)
 
     def test_site_admin(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['DivisionAdmin', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['DivisionAdmin', ])
+        group = self.group('example')
         r = user_group_admin_of_group(user, group)
 
         self.assertFalse(r)
 
     def test_site_admin_group_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['DivisionAdmin', 'GroupMember', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['DivisionAdmin', 'GroupMember', ])
+        group = self.group('example')
         r = user_group_admin_of_group(user, group)
 
         self.assertFalse(r)
 
     def test_non_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = []
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user([])
+        group = self.group('example')
         r = user_group_admin_of_group(user, group)
 
         self.assertFalse(r)
 
 
-class TestUserSiteAdminOfGroup(TestCase):
+class TestUserSiteAdminOfGroup(UserTest):
     'Test the ``user_site_admin_of_group`` function'
 
     def test_user_group_admin(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['GroupAdmin', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['GroupAdmin', ])
+        group = self.group('example')
         r = user_site_admin_of_group(user, group)
 
         self.assertFalse(r)
 
     def test_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['GroupMember', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['GroupMember', ])
+        group = self.group('example')
         r = user_site_admin_of_group(user, group)
 
         self.assertFalse(r)
 
     def test_site_admin(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['DivisionAdmin', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['DivisionAdmin', ])
+        group = self.group('example')
         r = user_site_admin_of_group(user, group)
 
         self.assertTrue(r)
 
     def test_site_admin_group_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['DivisionAdmin', 'GroupMember', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['DivisionAdmin', 'GroupMember', ])
+        group = self.group('example')
         r = user_site_admin_of_group(user, group)
 
         self.assertTrue(r)
 
     def test_non_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = []
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user([])
+        group = self.group('example')
         r = user_site_admin_of_group(user, group)
 
         self.assertFalse(r)
 
 
-class TestUserAdminOfGroup(TestCase):
+class TestUserAdminOfGroup(UserTest):
     'Test the ``user_admin_of_group`` function'
 
     def test_user_group_admin(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['GroupAdmin', 'GroupMember', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['GroupAdmin', 'GroupMember', ])
+        group = self.group('example')
         r = user_admin_of_group(user, group)
 
         self.assertTrue(r)
 
     def test_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['GroupMember', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['GroupMember', ])
+        group = self.group('example')
         r = user_admin_of_group(user, group)
 
         self.assertFalse(r)
 
     def test_site_admin(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['DivisionAdmin', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['DivisionAdmin', ])
+        group = self.group('example')
         r = user_admin_of_group(user, group)
 
         self.assertTrue(r)
 
     def test_site_admin_group_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = ['DivisionAdmin', 'GroupMember', ]
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user(['DivisionAdmin', 'GroupMember', ])
+        group = self.group('example')
         r = user_admin_of_group(user, group)
 
         self.assertTrue(r)
 
     def test_non_member(self):
-        user = MagicMock()
-        user.getRolesInContext.return_value = []
-        group = MagicMock()
-        group.getId.return_value = 'example'
+        user = self.user([])
+        group = self.group('example')
         r = user_admin_of_group(user, group)
 
         self.assertFalse(r)
@@ -410,18 +386,14 @@ class TestGetGroupUserIds(TestCase):
             get_group_userids(MagicMock(), None)
 
     @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSSiteInfo')
-    def test_not_group_or_site(self, m_IGSSI, m_IGSGI):
-        m_IGSSI.providedBy.return_value = False
+    def test_not_group_or_site(self, m_IGSGI):
         m_IGSGI.providedBy.return_value = False
         with self.assertRaises(TypeError):
             get_group_userids(MagicMock(), MagicMock())
 
     @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSSiteInfo')
-    def test_unicode(self, m_IGSSI, m_IGSGI):
+    def test_unicode(self, m_IGSGI):
         'Test getting the group-members when we pass in a unicode-string'
-        m_IGSSI.providedBy.return_value = False
         m_IGSGI.providedBy.return_value = False
         context = MagicMock()
         group = context.site_root().acl_users.getGroupById()
@@ -433,10 +405,8 @@ class TestGetGroupUserIds(TestCase):
         context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
     @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSSiteInfo')
-    def test_str(self, m_IGSSI, m_IGSGI):
+    def test_str(self, m_IGSGI):
         'Test getting the group-members when we pass in a byte-string'
-        m_IGSSI.providedBy.return_value = False
         m_IGSGI.providedBy.return_value = False
         context = MagicMock()
         group = context.site_root().acl_users.getGroupById()
@@ -448,10 +418,8 @@ class TestGetGroupUserIds(TestCase):
         context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
     @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSSiteInfo')
-    def test_groupInfo(self, m_IGSSI, m_IGSGI):
+    def test_groupInfo(self, m_IGSGI):
         'Test getting the group-members when we pass in a groupInfo'
-        m_IGSSI.providedBy.return_value = True
         m_IGSGI.providedBy.return_value = False
 
         context = MagicMock()
@@ -460,6 +428,7 @@ class TestGetGroupUserIds(TestCase):
         group.getUsers.return_value = expected
 
         groupInfo = MagicMock()
+        del(groupInfo.getId)  # So we look like an info-object
         groupInfo.id = 'example'
 
         r = get_group_userids(context, groupInfo)
@@ -468,10 +437,8 @@ class TestGetGroupUserIds(TestCase):
         context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
     @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSSiteInfo')
-    def test_siteInfo(self, m_IGSSI, m_IGSGI):
+    def test_siteInfo(self, m_IGSGI):
         'Test getting the group-members when we pass in a siteInfo'
-        m_IGSSI.providedBy.return_value = False
         m_IGSGI.providedBy.return_value = True
 
         context = MagicMock()
@@ -480,6 +447,7 @@ class TestGetGroupUserIds(TestCase):
         group.getUsers.return_value = expected
 
         siteInfo = MagicMock()
+        del(siteInfo.getId)  # So we look like an info-object
         siteInfo.id = 'example'
 
         r = get_group_userids(context, siteInfo)

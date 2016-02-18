@@ -29,6 +29,18 @@ class TestableList(MemberListABC):
         retval = self.ids
         return retval
 
+    @property
+    def groupInfo(self):
+        retval = MagicMock()
+        retval.id = 'example_group'
+        return retval
+
+    @property
+    def siteInfo(self):
+        retval = MagicMock()
+        retval.id = 'example'
+        return retval
+
 
 class TestListABC(TestCase):
     'Test the ``MemberListABC`` class'
