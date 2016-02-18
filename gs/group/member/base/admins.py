@@ -32,7 +32,11 @@ class SiteAdminMembers(MemberListABC):
 
     @Lazy
     def subsetIds(self):
-        adminIds = set([u for u in self.group.users_with_local_role('DivisionAdmin')])
+        # People *may* be given the site-admin role for just a group: a
+        # "super" group admin
+        divisionAdminInGroup = self.group.users_with_local_role('DivisionAdmin')
+        divisionAdminInSite = self.siteInfo.siteObj.users_with_local_role('DivisionAdmin')
+        adminIds = set(divisionAdminInGroup + divisionAdminInSite)
         retval = self.memberIds.intersection(adminIds)
         return retval
 
@@ -45,7 +49,7 @@ class GroupAdminMembers(MemberListABC):
 
     @Lazy
     def subsetIds(self):
-        adminIds = set([u for u in self.group.users_with_local_role('GroupAdmin')])
+        adminIds = set(self.group.users_with_local_role('GroupAdmin'))
         for uId in adminIds.difference(self.memberIds):
             m = 'The user ID %s is listed as an administrator of the group %s (%s) on the '\
                 'site %s (%s), but is  not a member of the group.' %\

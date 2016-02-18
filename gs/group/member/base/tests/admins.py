@@ -30,10 +30,12 @@ class TestSiteAdmins(AdminTest):
     'Test the ``SiteAdminMembers`` class'
 
     @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
-    def test_normal(self, m_mI):
+    @patch('gs.group.member.base.listabc.MemberListABC.siteInfo', new_callable=PropertyMock)
+    def test_normal(self, m_sI, m_mI):
         '''Test that the list of site admins is returned'''
+        m_sI().siteObj.users_with_local_role.return_value = ['a', 'b', 'c', ]
         g = MagicMock()
-        g.users_with_local_role.return_value = ['a', 'b', 'c', ]
+        g.users_with_local_role.return_value = []
         m_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = SiteAdminMembers(g)
         r = m.subsetIds
@@ -41,10 +43,25 @@ class TestSiteAdmins(AdminTest):
         self.assertEqual(set(['a', 'b', 'c']), r)
 
     @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
-    def test_non_member(self, m_mI):
-        '''Test that a non-member is excluded from the list of site admins in the group'''
+    @patch('gs.group.member.base.listabc.MemberListABC.siteInfo', new_callable=PropertyMock)
+    def test_super_group_admin(self, m_sI, m_mI):
+        '''Test that members with the DivisionAdmin role in just the group are returned'''
+        m_sI().siteObj.users_with_local_role.return_value = ['a', 'b', ]
         g = MagicMock()
-        g.users_with_local_role.return_value = ['a', 'b', 'c', ]
+        g.users_with_local_role.return_value = ['c', ]
+        m_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
+        m = SiteAdminMembers(g)
+        r = m.subsetIds
+
+        self.assertEqual(set(['a', 'b', 'c']), r)
+
+    @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
+    @patch('gs.group.member.base.listabc.MemberListABC.siteInfo', new_callable=PropertyMock)
+    def test_non_member(self, m_sI, m_mI):
+        '''Test that a non-member is excluded from the list of site admins in the group'''
+        m_sI().siteObj.users_with_local_role.return_value = ['a', 'b', 'c', ]
+        g = MagicMock()
+        g.users_with_local_role.return_value = []
         m_mI.return_value = set(['b', 'c', 'd', 'e', 'f', ])
         m = SiteAdminMembers(g)
         r = m.subsetIds
@@ -91,10 +108,12 @@ class TestGroupAdmins(AdminTest):
 class TestAdmins(AdminTest):
     @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
     @patch.object(GroupAdminMembers, 'memberIds', new_callable=PropertyMock)
-    def test_normal(self, m_GAM_mI, m_SAM_mI):
+    @patch('gs.group.member.base.listabc.MemberListABC.siteInfo', new_callable=PropertyMock)
+    def test_normal(self, m_sI, m_GAM_mI, m_SAM_mI):
         '''Test that the list of admins is returned'''
+        m_sI().siteObj.users_with_local_role.return_value = ['a', 'b', ]
         g = MagicMock()
-        g.users_with_local_role.side_effect = (['a', 'b', ], ['c', 'd', ], )
+        g.users_with_local_role.side_effect = ([], ['c', 'd', ], )
         m_GAM_mI.return_value = m_SAM_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = AdminMembers(g)
         r = m.subsetIds
@@ -103,10 +122,12 @@ class TestAdmins(AdminTest):
 
     @patch.object(SiteAdminMembers, 'memberIds', new_callable=PropertyMock)
     @patch.object(GroupAdminMembers, 'memberIds', new_callable=PropertyMock)
-    def test_dupe(self, m_GAM_mI, m_SAM_mI):
+    @patch('gs.group.member.base.listabc.MemberListABC.siteInfo', new_callable=PropertyMock)
+    def test_dupe(self, m_sI, m_GAM_mI, m_SAM_mI):
         '''Test that the list of admins is returned is someone is both a site and group admin'''
+        m_sI().siteObj.users_with_local_role.return_value = ['a', 'b', ]
         g = MagicMock()
-        g.users_with_local_role.side_effect = (['a', 'b', ], ['b', 'c', ], )
+        g.users_with_local_role.side_effect = ([], ['b', 'c', ], )
         m_GAM_mI.return_value = m_SAM_mI.return_value = set(['a', 'b', 'c', 'd', 'e', 'f', ])
         m = AdminMembers(g)
         r = m.subsetIds
