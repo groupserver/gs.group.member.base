@@ -32,7 +32,7 @@ class Moderators(MemberListABC):
 
     @Lazy
     def subsetIds(self):
-        retval = []
+        retval = set()
         if self.mlistInfo.is_moderated:
             mi = self.mlistInfo.get_property('moderator_members')
             moderatorIds = set(mi if mi else [])
