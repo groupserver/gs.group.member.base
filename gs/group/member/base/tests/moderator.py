@@ -33,7 +33,7 @@ class TestModerators(TestCase):
         m = Moderators(MagicMock())
         r = m.subsetIds
 
-        self.assertEqual([], r)
+        self.assertEqual(set([]), r)
 
     @patch.object(Moderators, 'memberIds', new_callable=PropertyMock)
     @patch.object(Moderators, 'mlistInfo', new_callable=PropertyMock)
