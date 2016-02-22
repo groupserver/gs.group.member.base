@@ -58,10 +58,15 @@ setup(
     zip_safe=False,
     install_requires=[
         'setuptools',
+        'SQLAlchemy',
+        'zope.cachedescriptors',
+        'zope.component',
+        'zope.interface',
+        'gs.core',
+        'gs.database',
+        'gs.profile.email.base',
         'Products.CustomUserFolder',
-        'Products.GSContent',
         'Products.GSGroup',
-        'Products.GSGroupMember'
     ],
     test_suite="{0}.tests.test_all".format(name),
     tests_require=['mock', ],
