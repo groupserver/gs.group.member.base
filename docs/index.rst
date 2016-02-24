@@ -7,7 +7,7 @@ Useful group membership utilities
 
 :Author: `Michael JasonSmith`_
 :Contact: Michael JasonSmith <mpj17@onlinegroups.net>
-:Date: 2016-02-23
+:Date: 2016-02-24
 :Organization: `GroupServer.org`_
 :Copyright: This document is licensed under a
 `Creative Commons Attribution-Share Alike 4.0 International License`_
@@ -23,6 +23,10 @@ Contents:
 
    api
    HISTORY
+
+This product contains the :doc:`classes and utility functions
+<api>` that are used by the other parts of GroupServer that deal
+with group-membership.
 
 Indices and tables
 ==================
