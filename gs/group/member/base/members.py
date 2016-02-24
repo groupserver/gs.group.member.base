@@ -26,9 +26,7 @@ from .verified import UnverifiedMembers
 
 
 class FullMembers(MemberListABC):
-    '''The list of group members other than those that have been invited to join the group
-
-This is normally what people refer to when they talk about "members".'''
+    '''The list of group members other than those that have been invited to join the group. This is normally what people refer to when they talk about "members".'''
 
     @property
     def fullMemberIds(self):

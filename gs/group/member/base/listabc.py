@@ -77,7 +77,7 @@ error, and the other members are processed.'''
         '''Get the identifier for the user.
 
 :param member: The member to get the identifier for, as either a :func:`str`
-(assumed to be an ID), a user-object, or a user-info object.
+               (assumed to be an ID), a user-object, or a user-info object.
 :returns: The identifier for the user
 :rtype: str
 :raises TypeError: The identifier could not be found from the member.

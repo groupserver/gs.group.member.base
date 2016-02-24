@@ -61,6 +61,8 @@ class GroupAdminMembers(MemberListABC):
 
 
 class AdminMembers(MemberListABC):
+    '''The list of group-members that are also *either* site administrators 
+or group administrators'''
     @property
     def adminIds(self):
         return self.subsetIds
