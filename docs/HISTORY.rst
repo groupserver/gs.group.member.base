@@ -1,6 +1,14 @@
 Changelog
 =========
 
+4.2.0 (2016-02-24)
+------------------
+
+* Adding Sphinx documentation
+* Adding the classes ``FullMembers``, ``AllMembers``,
+  ``NormalMembers``, ``GroupAdminMembers``, ``SiteAdminMembers``,
+  ``AdminMembers``, ``InvitedMembers``
+
 4.1.2 (2016-02-12)
 ------------------
 
