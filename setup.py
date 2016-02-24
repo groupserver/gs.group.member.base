@@ -65,8 +65,6 @@ setup(
         'gs.core',
         'gs.database',
         'gs.profile.email.base',
-        'Products.CustomUserFolder',
-        'Products.GSGroup',
     ],
     test_suite="{0}.tests.test_all".format(name),
     tests_require=['mock', ],

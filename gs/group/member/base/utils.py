@@ -16,8 +16,6 @@ from __future__ import absolute_import, unicode_literals, print_function
 from logging import getLogger
 import sys
 from gs.core import to_ascii
-from Products.CustomUserFolder.interfaces import IGSUserInfo
-from Products.GSGroup.interfaces import IGSGroupInfo
 
 log = getLogger('gs.group.member.base.utils')
 
@@ -54,10 +52,11 @@ flexible.'''
     if not g:
         raise ValueError('The group must be set (is "{0}")'.format(g))
 
-    if IGSGroupInfo.providedBy(g):
+    try:
         retval = g.groupObj
-    else:  # Just assume that it is a group
+    except AttributeError:
         retval = g
+    # --=mpj17=-- Could do a hasattr and raise a type error if something is amiss
     return retval
 
 
@@ -173,20 +172,12 @@ This function tests for that.'''
 def user_participation_coach_of_group(userInfo, groupInfo):
     '''Is the user an participation coach for the group?
 
-:param userInfo:  A GroupServer user.
-:param groupInfo: A GroupServer group.
+:param Products.CustomUserFolder.interfaces.IGSUserInfo userInfo:  A GroupServer user.
+:param Products.GSGroup.interfaces.IGSGroupInfo groupInfo: A GroupServer group.
 :retval: ``True`` if the user is the participation coach for the group; ``False`` otherwise.
 :rtype: bool'''
-    if not IGSUserInfo.providedBy(userInfo):
-        m = '{0} is not a IGSUserInfo'.format(userInfo)
-        raise TypeError(m)
-    if not IGSGroupInfo.providedBy(groupInfo):
-        m = '{0} is not a IGSGroupInfo'.format(groupInfo)
-        raise TypeError(m)
-
     ptnCoachId = groupInfo.get_property('ptn_coach_id', '')
-    retval = (user_member_of_group(userInfo, groupInfo)
-              and (userInfo.id == ptnCoachId))
+    retval = (user_member_of_group(userInfo, groupInfo) and (userInfo.id == ptnCoachId))
     assert type(retval) == bool
     return retval
 

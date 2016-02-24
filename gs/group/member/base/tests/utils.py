@@ -46,22 +46,18 @@ class TestGroupInfoToGroup(TestCase):
         with self.assertRaises(ValueError):
             groupInfo_to_group(None)
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    def test_is_group_info(self, m_IGSGI):
+    def test_is_group_info(self):
         'Test we get the group-object back from a group info'
-        m_IGSGI.providedBy.return_value = True
         groupInfo = MagicMock()
         groupInfo.groupObj = 'This is not a group'
         r = groupInfo_to_group(groupInfo)
 
         self.assertEqual(groupInfo.groupObj, r)
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    def test_is_group(self, m_IGSGI):
+    def test_is_group(self):
         'Test we get the group from a group'
-        m_IGSGI.providedBy.return_value = False
         group = MagicMock()
-        group.groupObj = 'This is not a group'
+        del(group.groupObj)
         r = groupInfo_to_group(group)
 
         self.assertEqual(group, r)
@@ -74,24 +70,21 @@ class TestUserInfoToUser(TestCase):
         with self.assertRaises(ValueError):
             userInfo_to_user(None)
 
-    @patch('gs.group.member.base.utils.IGSUserInfo')
-    def test_is_user_info(self, m_IGSUI):
+    def test_is_user_info(self):
         'Test we get the user-object back from a user-info'
-        m_IGSUI.providedBy.return_value = True
         userInfo = MagicMock()
         userInfo.user = 'This is not a user'
         r = userInfo_to_user(userInfo)
 
         self.assertEqual(userInfo.user, r)
 
-    @patch('gs.group.member.base.utils.IGSUserInfo')
-    def test_is_user(self, m_IGSUI):
+    def test_is_user(self):
         'Test we get the user from a user'
         user = MagicMock()
-        user.user = 'This is not a user'
+        del(user.user)
         r = userInfo_to_user(user)
 
-        self.assertEqual(user.user, r)
+        self.assertEqual(user, r)
 
 
 class UserTest(TestCase):
@@ -103,12 +96,14 @@ class UserTest(TestCase):
         retval.getRolesInContext.return_value = roles
         retval.getGroups.return_value = groups
         del(retval.user)  # So we throw an AttributeError on access
+        retval.getId.return_value = retval.id = 'example_user'
         return retval
 
     @staticmethod
     def group(gId):
         retval = MagicMock()
         retval.getId.return_value = gId
+        del(retval.groupObj)
         return retval
 
 
@@ -305,37 +300,9 @@ class TestUserAdminOfGroup(UserTest):
 class TestUserParticipationCoachOfGroup(TestCase):
     'Test the ``user_participation_coach_of_group`` function'
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSUserInfo')
-    def test_no_context(self, m_IGSUI, m_IGSGI):
-        m_IGSGI.providedBy.return_value = False
-        m_IGSUI.providedBy.return_value = True
-        with self.assertRaises(TypeError):
-            user_participation_coach_of_group(MagicMock(), MagicMock())
-
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSUserInfo')
-    def test_no_user(self, m_IGSUI, m_IGSGI):
-        m_IGSGI.providedBy.return_value = True
-        m_IGSUI.providedBy.return_value = False
-        with self.assertRaises(TypeError):
-            user_participation_coach_of_group(MagicMock(), MagicMock())
-
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSUserInfo')
-    def test_neither_group_user(self, m_IGSUI, m_IGSGI):
-        m_IGSGI.providedBy.return_value = False
-        m_IGSUI.providedBy.return_value = False
-        with self.assertRaises(TypeError):
-            user_participation_coach_of_group(MagicMock(), MagicMock())
-
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSUserInfo')
     @patch('gs.group.member.base.utils.user_member_of_group')
-    def test_coach(self, m_umog, m_IGSUI, m_IGSGI):
+    def test_coach(self, m_umog):
         m_umog.return_value = True
-        m_IGSGI.providedBy.return_value = True
-        m_IGSUI.providedBy.return_value = True
         groupInfo = MagicMock()
         groupInfo.get_property.return_value = 'example'
         userInfo = MagicMock()
@@ -344,13 +311,9 @@ class TestUserParticipationCoachOfGroup(TestCase):
 
         self.assertTrue(r)
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSUserInfo')
     @patch('gs.group.member.base.utils.user_member_of_group')
-    def test_coach_non_member(self, m_umog, m_IGSUI, m_IGSGI):
+    def test_coach_non_member(self, m_umog):
         m_umog.return_value = False
-        m_IGSGI.providedBy.return_value = True
-        m_IGSUI.providedBy.return_value = True
         groupInfo = MagicMock()
         groupInfo.get_property.return_value = 'example'
         userInfo = MagicMock()
@@ -359,13 +322,9 @@ class TestUserParticipationCoachOfGroup(TestCase):
 
         self.assertFalse(r)
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    @patch('gs.group.member.base.utils.IGSUserInfo')
     @patch('gs.group.member.base.utils.user_member_of_group')
-    def test_non_coach_member(self, m_umog, m_IGSUI, m_IGSGI):
+    def test_non_coach_member(self, m_umog):
         m_umog.return_value = True
-        m_IGSGI.providedBy.return_value = True
-        m_IGSUI.providedBy.return_value = True
         groupInfo = MagicMock()
         groupInfo.get_property.return_value = 'other'
         userInfo = MagicMock()
@@ -385,16 +344,15 @@ class TestGetGroupUserIds(TestCase):
         with self.assertRaises(ValueError):
             get_group_userids(MagicMock(), None)
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    def test_not_group_or_site(self, m_IGSGI):
-        m_IGSGI.providedBy.return_value = False
+    def test_not_group_or_site(self):
+        group = MagicMock()
+        del(group.id)
+        del(group.getId)
         with self.assertRaises(TypeError):
-            get_group_userids(MagicMock(), MagicMock())
+            get_group_userids(MagicMock(), group)
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    def test_unicode(self, m_IGSGI):
+    def test_unicode(self):
         'Test getting the group-members when we pass in a unicode-string'
-        m_IGSGI.providedBy.return_value = False
         context = MagicMock()
         group = context.site_root().acl_users.getGroupById()
         expected = ['member0', 'member1', ]
@@ -404,10 +362,8 @@ class TestGetGroupUserIds(TestCase):
         self.assertEqual(expected, r)
         context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    def test_str(self, m_IGSGI):
+    def test_str(self):
         'Test getting the group-members when we pass in a byte-string'
-        m_IGSGI.providedBy.return_value = False
         context = MagicMock()
         group = context.site_root().acl_users.getGroupById()
         expected = ['member0', 'member1', ]
@@ -417,11 +373,8 @@ class TestGetGroupUserIds(TestCase):
         self.assertEqual(expected, r)
         context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    def test_groupInfo(self, m_IGSGI):
+    def test_groupInfo(self):
         'Test getting the group-members when we pass in a groupInfo'
-        m_IGSGI.providedBy.return_value = False
-
         context = MagicMock()
         group = context.site_root().acl_users.getGroupById()
         expected = ['member0', 'member1', ]
@@ -436,11 +389,8 @@ class TestGetGroupUserIds(TestCase):
         self.assertEqual(expected, r)
         context.site_root().acl_users.getGroupById.assert_any_call('example_member', [])
 
-    @patch('gs.group.member.base.utils.IGSGroupInfo')
-    def test_siteInfo(self, m_IGSGI):
+    def test_siteInfo(self):
         'Test getting the group-members when we pass in a siteInfo'
-        m_IGSGI.providedBy.return_value = True
-
         context = MagicMock()
         group = context.site_root().acl_users.getGroupById()
         expected = ['member0', 'member1', ]
