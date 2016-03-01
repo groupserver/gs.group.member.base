@@ -9,9 +9,9 @@ The base group member code
 :Contact: Michael JasonSmith <mpj17@onlinegroups.net>
 :Date: 2016-02-24
 :Organization: `GroupServer.org`_
-:Copyright: This document is licensed under a
-`Creative Commons Attribution-Share Alike 4.0 International License`_
-  by `OnlineGroups.net`_.
+:Copyright: This document is licensed under a `Creative Commons
+            Attribution-Share Alike 4.0 International License`_
+            by `OnlineGroups.net`_.
 
 ..  _Creative Commons Attribution-Share Alike 4.0 International License:
     http://creativecommons.org/licenses/by-sa/4.0/
