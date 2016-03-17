@@ -15,7 +15,7 @@
 from __future__ import absolute_import, unicode_literals, print_function
 from mock import (MagicMock, patch, PropertyMock)
 from unittest import TestCase
-from gs.group.member.base.members import (NormalMembers, AllMembers, )
+from gs.group.member.base.members import (NormalMembers, AllMembers, FullMembers, )
 
 
 class TestNormalMembers(TestCase):
@@ -117,3 +117,17 @@ class TestAllMembers(TestCase):
         r = a.subsetIds
 
         self.assertEqual(set(['dirk', 'dinsdale', 'piranah', ]), r)
+
+
+class TestFullMembers(TestCase):
+    'Test the ``FullMembers`` class'
+
+    @patch.object(FullMembers, 'memberIds', new_callable=PropertyMock)
+    def test_subset(self, m_memberIds):
+        'Do we get all the members as the ``subset``'
+        m_memberIds.return_value = set(['dirk', 'dinsdale', ])
+
+        f = FullMembers(MagicMock())
+        r = f.subsetIds
+
+        self.assertEqual(set(['dirk', 'dinsdale', ]), r)
