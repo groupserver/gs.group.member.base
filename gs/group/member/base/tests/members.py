@@ -90,6 +90,31 @@ class TestNormalMembers(TestCase):
         self.assertEqual(set(['dirk', 'dinsdale', ]), r)
         self.assertEqual(1, m_warn.call_count)
 
+    @patch.object(NormalMembers, 'memberIds', new_callable=PropertyMock)
+    @patch.object(NormalMembers, 'ptnCoachId', new_callable=PropertyMock)
+    @patch('gs.group.member.base.members.AdminMembers.subsetIds', new_callable=PropertyMock)
+    @patch('gs.group.member.base.members.BlockedMembers.subsetIds', new_callable=PropertyMock)
+    @patch('gs.group.member.base.members.ModeratedMembers.subsetIds', new_callable=PropertyMock)
+    @patch('gs.group.member.base.members.Moderators.subsetIds', new_callable=PropertyMock)
+    @patch('gs.group.member.base.members.PostingMembers.subsetIds', new_callable=PropertyMock)
+    @patch('gs.group.member.base.members.UnverifiedMembers.subsetIds', new_callable=PropertyMock)
+    def test_remove_special(self, m_UM_sI, m_PM_sI, m_M_sI, m_MM_sI, m_BM_sI, m_AM_sI,
+                            m_ptnCoachId, m_memberIds):
+        'Ensure we remove the *special* people from the list of normal members'
+        m_UM_sI.return_value = set(['a'])
+        m_PM_sI.return_value = set(['b'])
+        m_M_sI.return_value = set(['c'])
+        m_MM_sI.return_value = set(['d'])
+        m_BM_sI.return_value = set(['e'])
+        m_AM_sI.return_value = set(['f'])
+        m_ptnCoachId.return_value = 'g'
+        m_memberIds.return_value = set('abcdefgh')
+
+        n = NormalMembers(MagicMock())
+        r = n.subsetIds
+
+        self.assertEqual(set(['h', ]), r)
+
 
 class TestAllMembers(TestCase):
     'Test the ``AllMembers`` class'
