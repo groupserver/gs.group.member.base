@@ -15,7 +15,7 @@
 from __future__ import absolute_import, unicode_literals, print_function
 from mock import (MagicMock, patch, PropertyMock)
 from unittest import TestCase
-from gs.group.member.base.members import (NormalMembers, )
+from gs.group.member.base.members import (NormalMembers, AllMembers, )
 
 
 class TestNormalMembers(TestCase):
@@ -89,3 +89,31 @@ class TestNormalMembers(TestCase):
 
         self.assertEqual(set(['dirk', 'dinsdale', ]), r)
         self.assertEqual(1, m_warn.call_count)
+
+
+class TestAllMembers(TestCase):
+    'Test the ``AllMembers`` class'
+
+    @patch('gs.group.member.base.members.InvitedMembers.subsetIds', new_callable=PropertyMock)
+    @patch.object(AllMembers, 'memberIds', new_callable=PropertyMock)
+    def test_no_invite(self, m_memberIds, m_Invited_subsetIds):
+        'Cope with no invited members'
+        m_Invited_subsetIds.return_value = set()
+        m_memberIds.return_value = set(['dirk', 'dinsdale', ])
+
+        a = AllMembers(MagicMock())
+        r = a.subsetIds
+
+        self.assertEqual(set(['dirk', 'dinsdale', ]), r)
+
+    @patch('gs.group.member.base.members.InvitedMembers.subsetIds', new_callable=PropertyMock)
+    @patch.object(AllMembers, 'memberIds', new_callable=PropertyMock)
+    def test_invite(self, m_memberIds, m_Invited_subsetIds):
+        'Cope with invited members'
+        m_Invited_subsetIds.return_value = set(['dirk', 'piranah', ])
+        m_memberIds.return_value = set(['dirk', 'dinsdale', ])
+
+        a = AllMembers(MagicMock())
+        r = a.subsetIds
+
+        self.assertEqual(set(['dirk', 'dinsdale', 'piranah', ]), r)
