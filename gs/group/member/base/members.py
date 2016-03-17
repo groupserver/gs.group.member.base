@@ -14,6 +14,7 @@
 #
 ############################################################################
 from __future__ import absolute_import, unicode_literals, print_function
+from logging import getLogger
 from zope.cachedescriptors.property import Lazy
 from .admins import AdminMembers
 from .blocked import BlockedMembers
@@ -23,6 +24,8 @@ from .moderated import ModeratedMembers
 from .moderator import Moderators
 from .posting import PostingMembers
 from .verified import UnverifiedMembers
+
+log = getLogger('gs.group.member.base.members')
 
 
 class FullMembers(MemberListABC):
@@ -70,5 +73,11 @@ that lack a verified email address, and the participation coach'''
             Moderators(self.group).subsetIds - PostingMembers(self.group).subsetIds -\
             UnverifiedMembers(self.group).subsetIds
         if self.ptnCoachId:
-            retval.remove(self.ptnCoachId)
+            try:
+                retval.remove(self.ptnCoachId)
+            except KeyError:
+                m = 'Participation coach for %s (%s) on %s (%s) listed as "%s" but they are not a '\
+                    'member'
+                log.warn(m, self.groupInfo.name, self.groupInfo.id, self.siteInfo.name,
+                         self.siteInfo.id, self.ptnCoachId)
         return retval
