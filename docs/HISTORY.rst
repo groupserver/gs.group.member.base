@@ -1,6 +1,12 @@
 Changelog
 =========
 
+4.2.1 (2016-03-17)
+------------------
+
+* Coping with a *precipitation coach* being specified but the
+  same person not being a member of the group
+
 4.2.0 (2016-02-24)
 ------------------
 
