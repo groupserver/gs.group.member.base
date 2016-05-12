@@ -91,10 +91,10 @@ class UserTest(TestCase):
     'And ABC for tests involving users'
 
     @staticmethod
-    def user(roles, groups=[]):
+    def user(roles, groups=None):
         retval = MagicMock()
         retval.getRolesInContext.return_value = roles
-        retval.getGroups.return_value = groups
+        retval.getGroups.return_value = [] if groups is None else groups
         del(retval.user)  # So we throw an AttributeError on access
         retval.getId.return_value = retval.id = 'example_user'
         return retval
